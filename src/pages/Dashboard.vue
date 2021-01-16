@@ -118,7 +118,6 @@
     </div>
 </template>
 <script lang="ts">
-import config from '../config';
 import DiscordAccount from './Profile/DiscordAccount.vue';
 import api from '../services/api';
 import { Component, Vue } from 'vue-property-decorator';

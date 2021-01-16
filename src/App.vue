@@ -20,7 +20,6 @@ import { ievents } from './store';
 import { ensureLanguageAsync, setI18nLanguageAsync } from './i18n/index';
 import auth from './services/auth';
 import discord from './services/discord';
-import config from './config';
 import http from './services/http';
 
 @Component({
