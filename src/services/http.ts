@@ -30,7 +30,7 @@ class Http {
 
     public validateRequest(path: string, options?: object) {
         return new Promise((resolve, reject) => {
-            resolve();
+            resolve;
             // if (Vue.$auth.isAuthenticated()) {
             //   resolve()
             // } else {
@@ -116,6 +116,36 @@ class Http {
             Object.assign(
                 {
                     method: 'POST',
+                    body: JSON.stringify(content),
+                },
+                options || {},
+            ),
+        );
+    }
+
+    /**
+     * API POST request
+     *
+     * @param  {String} path
+     * @param  {Object} content
+     * @param  {Object} query (optional)
+     * @param  {Object} options (optional)
+     * @return {Promise}
+     */
+    public patch<T>(
+        path: string,
+        content: any,
+        query?: object,
+        options?: object,
+    ): Promise<T> {
+        if (!options) {
+            options = query;
+        }
+        return this.apifetch(
+            this.getPathAndQuery(path, query, content),
+            Object.assign(
+                {
+                    method: 'PATCH',
                     body: JSON.stringify(content),
                 },
                 options || {},

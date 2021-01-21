@@ -92,7 +92,7 @@ export class Api implements PluginObject<any> {
         async createOrganization(organization: Organization) {
             return new Organization(
                 await http.put<OrganizationModel>(
-                    `organizations/new`,
+                    `organizations/create`,
                     organization.toModel(),
                 ),
             );
@@ -114,16 +114,13 @@ export class Api implements PluginObject<any> {
         async getPlayerOrganizations(player: Player, role?: string) {
             const orgs: Organization[] = [];
             (
-                await http.post<OrganizationModel[]>(
-                    `organizations/player/${role}`,
-                    player,
-                )
+                await http.get<OrganizationModel[]>(`organizations/Mine`)
             ).forEach((org) => orgs.push(new Organization(org)));
             return orgs;
         },
         // MEMBERS
         getMember(player: Player) {
-            return http.post<Member>(`organizations/members`, player);
+            return http.post<Member>(`organizations/Members`, player);
         },
         addMember(organizationId: string, member: Member) {
             return http.put<Member>(
@@ -132,8 +129,8 @@ export class Api implements PluginObject<any> {
             );
         },
         updateMember(organizationId: string, member: Member) {
-            return http.put<Member>(
-                `organizations/${organizationId}/members/update`,
+            return http.patch<Member>(
+                `organizations/${organizationId}/members`,
                 member,
             );
         },
