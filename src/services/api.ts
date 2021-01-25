@@ -13,10 +13,10 @@ export class Api implements PluginObject<any> {
     // Session //
     public session = {
         getCurrentSession() {
-            return http.get<Session>('session/currentsession');
+            return http.get<Player>('Session');
         },
         updateCurrentUser(user: Player) {
-            return http.put<User>('session/currentuser', user);
+            return http.put<User>('Session', user);
         },
     };
 

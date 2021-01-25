@@ -1,12 +1,12 @@
 let basePath = '';
 
-if (process.env.NODE_ENV == 'development') {
-    basePath = 'https://localhost:44328';
+if (process.env.NODE_ENV === 'development') {
+    basePath = 'https://buk-gg-website-kn2ikckb5a-ez.a.run.app';
 }
 
 export default {
     api: {
-        basePath: basePath,
+        basePath,
     },
     authentication: {
         domain: 'login.bcc.no',

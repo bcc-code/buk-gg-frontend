@@ -5,7 +5,6 @@ import { RootStore } from '@/store';
 import BaseStore from '@/store/modules/base/BaseStore';
 
 export interface SessionState {
-    currentSession?: Session;
     currentUser?: User;
     isAuthenticated: boolean;
     isImpersonating: boolean;
@@ -18,7 +17,6 @@ export class SessionStore extends BaseStore<SessionState> {
 
     constructor(rootStore: RootStore) {
         super('session', rootStore, {
-            currentSession: undefined,
             currentUser: undefined,
             isAuthenticated: false,
             isImpersonating: false,
@@ -29,9 +27,8 @@ export class SessionStore extends BaseStore<SessionState> {
         // MUTATIONS //
         this.mutations = {
             ...this.mutations,
-            setCurrentSession: (state, value: Session) => {
-                state.currentSession = value;
-                state.currentUser = value.currentUser;
+            setCurrentSession: (state, value: Player) => {
+                state.currentUser = value;
                 if (value) {
                     state.isAuthenticated = true;
                 } else {
@@ -43,7 +40,6 @@ export class SessionStore extends BaseStore<SessionState> {
                 state.currentUser = value;
             },
             clearCurrentSession: (state) => {
-                state.currentSession = undefined;
                 state.currentUser = undefined;
                 state.isAuthenticated = false;
             },
@@ -82,13 +78,13 @@ export class SessionStore extends BaseStore<SessionState> {
             },
             setDiscordConnected: (state, connected: boolean) => {
                 state.currentUser.discordIsConnected = connected;
-            }
+            },
         };
 
         // ACTIONS //
         this.actions = {
             ...this.actions,
-            loadCurrentSession: async (store): Promise<Session> => {
+            loadCurrentSession: async (store): Promise<Player> => {
                 const session = await api.session.getCurrentSession();
                 this.setCurrentSession(session);
                 return session;
@@ -205,13 +201,6 @@ export class SessionStore extends BaseStore<SessionState> {
                 state.currentUser ? state.currentUser.email || '' : '',
             currentUserDisplayName: (state) =>
                 state.currentUser ? state.currentUser.displayName || '' : '',
-            authenticatedUserCanImpersonate: (state) => {
-                return state.currentSession &&
-                    (state.currentSession as Session).authenticatedUser
-                    ? (state.currentSession as Session).authenticatedUser
-                          .canImpersonate || false
-                    : false;
-            },
         };
     }
 
@@ -224,14 +213,14 @@ export class SessionStore extends BaseStore<SessionState> {
     public setUserDataLoaded = (value: boolean) =>
         this.commit('setUserDataLoaded', value)
     public clearCurrentSession = () => this.commit('clearCurrentSession');
-    public setCurrentSession = (session: Session) =>
+    public setCurrentSession = (session: Player) =>
         this.commit('setCurrentSession', session)
     public setCurrentUser = (user: User) => this.commit('setCurrentUser', user);
 
     // TYPED ACTIONS //
     public startSession = () => this.dispatch('startSession');
     public loadCurrentSession = () =>
-        this.dispatch('loadCurrentSession') as Promise<Session>
+        this.dispatch('loadCurrentSession') as Promise<Player>
     public loadUserData = (reload: boolean) =>
         this.dispatch('loadUserData', reload) as Promise<any>
     public ensureUserData = () =>

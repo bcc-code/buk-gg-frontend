@@ -25,6 +25,7 @@ const routes: RouterOptions['routes'] = [
     {
         path: '/dashboard',
         name: 'dashboard',
+        alias: '/callback',
         component: Dashboard,
     },
     {

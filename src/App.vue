@@ -16,11 +16,8 @@
 // import './@types/global.d.ts';
 import { Component, Vue } from 'vue-property-decorator';
 import DashboardLayout from '@/layout/DashboardLayout.vue';
-import { ievents } from './store';
-import { ensureLanguageAsync, setI18nLanguageAsync } from './i18n/index';
+import { setI18nLanguageAsync } from './i18n/index';
 import auth from './services/auth';
-import discord from './services/discord';
-import http from './services/http';
 
 @Component({
     components: {
@@ -29,14 +26,6 @@ import http from './services/http';
 })
 export default class App extends Vue {
     public async mounted() {
-
-        const version = await localStorage.getItem('version');
-        const apiVersion = await http.get<string>('version');
-        if (version !== apiVersion && apiVersion) {
-            await localStorage.setItem('version', apiVersion);
-            window.location.reload(true);
-        }
-
         this.$watch('$sidebar.showSidebar', this.toggleNavOpen);
         // Source: https://dennisreimann.de/articles/delegating-html-links-to-vue-router.html
         window.addEventListener('click', ($event) => {
@@ -99,15 +88,16 @@ export default class App extends Vue {
             });
         }
 
-        if (await localStorage.getItem('lang')) {
-            setI18nLanguageAsync(await localStorage.getItem('lang'));
+        if (localStorage.getItem('lang')) {
+            setI18nLanguageAsync(localStorage.getItem('lang'));
         } else if (navigator.language === 'no-NB') {
             setI18nLanguageAsync('no');
-            await localStorage.setItem('lang', 'no');
+            localStorage.setItem('lang', 'no');
         } else {
             setI18nLanguageAsync('en');
-            await localStorage.setItem('lang', 'en');
+            localStorage.setItem('lang', 'en');
         }
+
 
         while (!auth.isAuthenticated()) {
             await new Promise((resolve) => setTimeout(resolve, 10));

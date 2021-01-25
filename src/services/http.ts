@@ -29,8 +29,8 @@ class Http {
     }
 
     public validateRequest(path: string, options?: object) {
-        return new Promise((resolve, reject) => {
-            resolve;
+        return new Promise<void>((resolve, reject) => {
+            resolve();
             // if (Vue.$auth.isAuthenticated()) {
             //   resolve()
             // } else {
@@ -82,6 +82,7 @@ class Http {
      */
     public get<T>(path: string, query?: any, options?: any): Promise<T> {
         query = Object.assign({ r: new Date().getTime() }, query || {});
+
         return this.apifetch(
             this.getPathAndQuery(path, query),
             Object.assign(

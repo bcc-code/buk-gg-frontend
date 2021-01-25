@@ -1,10 +1,3 @@
-
-// SESSION
-interface Session {
-    currentUser: User;
-    authenticatedUser: User;
-}
-
 interface Player {
     _id: string;
     email?: string;
@@ -26,6 +19,8 @@ interface Player {
     isRegistered: boolean;
     agreeToPrivacyPolicy: boolean;
     phoneNumber: string;
+    canImpersonate: boolean;
+    isAdministrator: boolean;
 }
 
 interface ExtraDiscordUser {
