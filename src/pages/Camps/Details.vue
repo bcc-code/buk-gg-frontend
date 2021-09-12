@@ -3,7 +3,7 @@
         <div class="col-lg-8 blog-page">
             <div
                 v-if="
-                    ['pc2020', 'rc2019', 'pinse2020', 'hc2020', 'rc2020'].includes(
+                    ['pc2020', 'rc2019', 'pinse2020', 'hc2020', 'rc2020', 'hc2021'].includes(
                         $route.params.camp,
                     )
                 "
@@ -11,6 +11,7 @@
                 <card class="organization-header">
                     <img
                         slot="image"
+                        alt="Main Image"
                         class="card-img-top"
                         style="height: 500px; object-fit: contain"
                         :src="`/img/${$route.params.camp}-logo.png`"
