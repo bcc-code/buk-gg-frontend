@@ -187,7 +187,7 @@ export class OrganizationStore extends CrudStore<
         return api.organizations.getMember(player);
     }
 
-    public addMember = (member: Member) => {
+    public addMember = (member: {id: string}) => {
         return this.dispatch('addMember', member) as Promise<Member>;
     }
 

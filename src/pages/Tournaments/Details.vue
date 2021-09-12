@@ -33,7 +33,7 @@
                         v-if="tournament.registrationForm"
                         type="secondary"
                         @click="openRegistrationForm()"
-                        >{{ $t('registration.singleRegistration').toUpperCase() }}</base-button
+                        >{{ `${$t('registration.singleRegistration')}`.toUpperCase() }}</base-button
                     >
                     <base-button
                         class="center-mobile float-right"
@@ -220,7 +220,7 @@
                         "
                     />
                     <h3 class="title">
-                        {{ $t('common.contact').toUpperCase() }}
+                        {{ `${$t('common.contact')}`.toUpperCase() }}
                     </h3>
                     <div
                         v-for="contact in tournament.contacts"
@@ -245,8 +245,8 @@
                 </div>
             </card>
             <base-table
-                v-if="tournament.teams.length > 0"
-                :data="tournament.teams"
+                v-if="teams.length > 0"
+                :data="teams"
                 :columns="['name', '_id']"
                 class="org-list"
             >
@@ -302,15 +302,9 @@ import api from '../../services/api';
         RegistrationModal,
         SemipolarSpinner,
     },
-    computed: {
-        currentUserIsResponsible() {
-            return this.tournament?.responsibleId === this.$session.state.currentUser._id;
-        },
-    },
 })
 export default class TournamentDetails extends Vue {
     public viewRegistration: boolean = false;
-    public teams: Team[] = [];
     public currentUrl: string = document.location.hostname;
     public tournament: TournamentInfo | any = { body: '', teams: [] };
     public eligibleTeams: string[] = [];
@@ -337,8 +331,18 @@ export default class TournamentDetails extends Vue {
                 this.$route.params.tournamentId,
             );
             this.tournament = this.$tournaments.current;
+
+            console.log(this.tournament);
             // this.teams = await this.$tournaments.getEligibleTeamsForCaptain(this.$tournaments.current.game._id);
         }
+    }
+
+    public get teams() {
+        return this.tournament?.teams ?? [];
+    }
+
+    public get currentUserIsResponsible() {
+        return this.tournament?.responsibleId === this.$session.state.currentUser._id;
     }
 }
 </script>

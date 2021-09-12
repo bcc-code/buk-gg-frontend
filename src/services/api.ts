@@ -124,7 +124,7 @@ export class Api implements PluginObject<any> {
         },
         addMember(organizationId: string, member: Member) {
             return http.put<Member>(
-                `organizations/${organizationId}/members`,
+                `organizations/${organizationId}/Members`,
                 member.player,
             );
         },

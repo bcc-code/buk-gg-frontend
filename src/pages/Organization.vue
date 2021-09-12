@@ -265,17 +265,6 @@ import { TeamCard } from './Organizations/';
         MemberList,
         SelectMember,
     },
-    computed: {
-        pageLoading() {
-            return this.loading.page ? 'opacity: 0; transition: opacity 0.2s' : 'opacity: 1; transition: opacity 0.2s';
-        },
-        members() {
-            return this.$organizations.current?.members || [];
-        },
-        pending() {
-            return this.$organizations.current?.pending || [];
-        },
-    },
 })
 
 export default class OrganizationDetails extends Vue {
@@ -288,6 +277,18 @@ export default class OrganizationDetails extends Vue {
     public updateKey: number = 0;
     public addCaptainField: string = '';
     public newName: string = '';
+
+    public get members() {
+        return this.$organizations.current?.members ?? [];
+    }
+
+    public get pending() {
+        return this.$organizations.current?.pending ?? [];
+    }
+
+    public get pageLoading() {
+        return this.loading.page ? 'opacity: 0; transition: opacity 0.2s' : 'opacity: 1; transition: opacity 0.2s';
+    }
 
     public alert = {
         failedAdd: false,
@@ -395,9 +396,7 @@ export default class OrganizationDetails extends Vue {
     public async searchThroughDiscord() {
         this.searchResult.members = [];
         if (this.searchField !== '') {
-            const result = JSON.parse(
-                await discord.searchForMember(this.searchField),
-            );
+            const result = await discord.searchForMember(this.searchField);
             this.searchResult.discord = result;
         }
     }
@@ -405,17 +404,7 @@ export default class OrganizationDetails extends Vue {
     public async addMember(player?: any, discordId?: any) {
         this.searchField = '';
         this.loading.addMember = player?._id || discordId;
-        let member: Member = {
-            _key: player?._id || null,
-            player,
-            role: 'member',
-        };
-        if (discordId) {
-            member = await this.$organizations.getMember({
-                discordId,
-            } as Player);
-        }
-        const result = (await this.$organizations.addMember(member)) as Member;
+        const result = (await this.$organizations.addMember({id: player?._id ?? discordId})) as Member;
         this.searchResult = {
             discord: [],
             members: [],

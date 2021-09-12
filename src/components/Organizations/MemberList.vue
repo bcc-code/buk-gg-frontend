@@ -6,7 +6,7 @@
                     class="col-12"
                     :data="members"
                     :columns="['id', 'nickname', 'discordUser']"
-                    :style="pending.lenght > 0 ? 'height:50%' : ''"
+                    :style="pending.length > 0 ? 'height:50%' : ''"
                 >
                     <template slot="columns">
                         <th>Name</th>
@@ -140,14 +140,7 @@ import { BaseTable, LoadingButton } from '../../components';
         },
     },
     computed: {
-        rowStyle() {
-            return {
-                owner: 'color: #37b5ff',
-                officer: 'color: #a7d252',
-                captain: 'color: #ff9c2b',
-                member: '',
-            };
-        },
+        
         pending() {
             return this.$organizations.current?.pending || [];
         },
@@ -173,6 +166,12 @@ export default class OrganizationMemberList extends Vue {
         addMember: '',
         joinRequest: false,
         leaveOrganization: false,
+    };
+    public rowStyle = {
+        owner: 'color: #37b5ff',
+        officer: 'color: #a7d252',
+        captain: 'color: #ff9c2b',
+        member: '',
     };
 
     public async setRole(player: Player, role: string) {
@@ -202,7 +201,7 @@ export default class OrganizationMemberList extends Vue {
 
     public async addMember(player: Player) {
         this.loading.addMember = player._id;
-        await this.$organizations.addMember({player, role: 'member'} as Member);
+        await this.$organizations.addMember({id: player._id});
         this.loading.addMember = '';
     }
 

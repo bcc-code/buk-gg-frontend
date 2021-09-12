@@ -7,7 +7,8 @@
                     slot="image"
                     @click="pushToDiscord()"
                     style="cursor: pointer; width: 390px;"
-                    src="https://discordapp.com/assets/e7a3b51fdac2aa5ec71975d257d5c405.png"
+                    src="/img/discord-banner.svg"
+                    alt="Discord"
                 />
                 <div class="card-body">
                     <div v-if="player.discordId">
