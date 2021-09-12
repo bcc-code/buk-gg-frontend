@@ -1,7 +1,9 @@
-let basePath = '';
+let basePath = 'https://buk-gg-website-kn2ikckb5a-ez.a.run.app';
 
 if (process.env.NODE_ENV === 'development') {
-    basePath = 'https://localhost:44328'; // 'https://buk-gg-website-kn2ikckb5a-ez.a.run.app';
+    basePath =
+    'https://localhost:44328';
+    // 'https://buk-gg-website-kn2ikckb5a-ez.a.run.app';
 }
 
 export default {

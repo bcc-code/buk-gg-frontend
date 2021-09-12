@@ -1,6 +1,8 @@
 /dist/
 /wwwroot
+/.firebase
 node_modules/
+
 
 # local env files
 .env.local
