@@ -49,7 +49,7 @@
                             <template>
                                 <div class="text-muted text-center mb-3">
                                     <h3 class="modal-title">
-                                        SELECT CAPTAIN
+                                        SELECT MEMBER
                                     </h3>
                                 </div>
                                 <div>
@@ -71,10 +71,10 @@
                                     </template>
                                     <template slot-scope="{ row }">
                                         <td @click="handleMember(row)">
-                                            {{ row.player.nickname }}
+                                            {{ row.player ? row.player.nickname : undefined}}
                                         </td>
                                         <td @click="handleMember(row)">
-                                            {{ row.player.discordUser }}
+                                            {{ row.player ? row.player.discordUser : undefined}}
                                         </td>
                                     </template>
                                 </base-table>
@@ -136,13 +136,13 @@ import { SlideYUpTransition } from 'vue2-transitions';
                 const search = this.searchField
                     ?.toLowerCase();
                 return (
-                    member.player.nickname
+                    member.player?.nickname
                         ?.toLowerCase()
                         .includes(search) ||
-                    member.player.discordUser
+                    member.player?.discordUser
                         ?.toLowerCase()
                         .includes(search) ||
-                    member.player.name
+                    member.player?.name
                         ?.toLowerCase()
                         .includes(search)
                 );

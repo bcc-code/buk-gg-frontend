@@ -4,7 +4,6 @@ import CrudStore, { CrudState } from './base/CrudStore';
 import { Team } from '@/classes';
 
 export interface TeamState extends CrudState<Team, string> {
-    myTeams: Team[];
     currentTeams: Team[];
     teams: Team[];
 }
@@ -14,16 +13,12 @@ export class TeamStore extends CrudStore<Team, TeamState, string> {
         super('teams', rootStore, {
             all: [],
             item: {},
-            myTeams: [],
             currentTeams: [],
             teams: [],
         });
 
         this.mutations = {
             ...this.mutations,
-            setMyTeams: (state, items: Team[]) => {
-                state.myTeams = items;
-            },
             addPlayer: (state, obj: { team: Team; player: Player }) => {
                 obj.team.addPlayer(obj.player);
                 this.updateItem(obj.team);
@@ -84,36 +79,12 @@ export class TeamStore extends CrudStore<Team, TeamState, string> {
                 if (items?.length > 0) {
                     this.commit('setTeams', items);
                 }
-                const myTeams = await api.teams.getMyTeams();
-                if (items?.length > 0) {
-                    this.commit('setMyTeams', myTeams);
-                }
             },
         };
 
         this.getters = {
             ...this.getters,
-            myTeams: (state) => {
-                return state.myTeams;
-            },
-            myTeamsCaptain: (state) => {
-                const playerOrgIds = [];
-                rootStore.state.organizations.playerOrganizations.forEach((org) => {
-                    if (['owner', 'officer'].includes(org.members.find((m) => m.player?._id === rootStore.state.session.currentUser?._id).role)) {
-                        playerOrgIds.push(org.id);
-                    }
-                });
-                return state.myTeams.filter((t) => t.organizationId);
-            },
         };
-    }
-
-    public get myTeams() {
-        return this.read('myTeams') as Team[];
-    }
-
-    public get myTeamsCaptain() {
-        return this.read('myTeamsCaptain') as Team[];
     }
 
     // ACTIONS
@@ -158,7 +129,8 @@ export class TeamStore extends CrudStore<Team, TeamState, string> {
         }
     }
 
-    protected loadAllFromSource(): Promise<Team[]> {
-        return api.teams.getMyTeams();
+    protected async loadAllFromSource(): Promise<Team[]> {
+        await this.loadTeams();
+        return [];
     }
 }

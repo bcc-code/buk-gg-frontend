@@ -122,10 +122,9 @@ export class Api implements PluginObject<any> {
         getMember(player: Player) {
             return http.post<Member>(`organizations/Members`, player);
         },
-        addMember(organizationId: string, member: Member) {
+        addMember(organizationId: string, member: {id: string}) {
             return http.put<Member>(
-                `organizations/${organizationId}/Members`,
-                member.player,
+                `organizations/${organizationId}/Members`, member,
             );
         },
         updateMember(organizationId: string, member: Member) {
@@ -164,15 +163,6 @@ export class Api implements PluginObject<any> {
             (await http.get<TeamModel[]>(`teams/`)).forEach((team) => teams.push(new Team(team)));
             return teams;
         },
-        async getMyTeams(): Promise<Team[]> {
-            const teams: Team[] = [];
-            (
-                await http.get<TeamModel[]>(
-                    `teams/mine`,
-                )
-            ).forEach((team) => teams.push(new Team(team)));
-            return teams;
-        },
         async getTeamsInGame(gameId: string) {
             const teams: Team[] = [];
             (
@@ -187,11 +177,11 @@ export class Api implements PluginObject<any> {
         },
         async updateTeam(team: Team) {
             return new Team(
-                (await http.put<SanityResult<TeamModel>>(`teams/update`, team.toModel())).item,
+                await http.put<TeamModel>(`teams/update`, team.toModel()),
             );
         },
         deleteTeam(team: Team) {
-            return http.post<boolean>(`teams/delete`, team.toModel());
+            return http.delete(`teams/delete/${team.id}`);
         },
         // GAMES
         getGames() {

@@ -221,8 +221,13 @@ import api from '../../services/api';
 export default class TournamentRegistration extends Vue {
     public player: User = {} as User;
     public tournament: TournamentInfo;
-    public eligibleTeams: string[] = [];
-    public teams: Team[] = [];
+
+    public get teams(): Team[] {
+        return this.$teams.state.teams?.filter((t) => t.gameId === this.tournament.game._id) ?? [];
+    }
+    public get eligibleTeams() {
+        return this.teams.filter(t => t.players.length >= this.tournament.teamSize.min && t.players.length <= this.tournament.teamSize.max);
+    }
     public successAdd: boolean = false;
     public viewModal: boolean = false;
     public viewInfoModal: boolean = false;
@@ -247,18 +252,6 @@ export default class TournamentRegistration extends Vue {
                 answer: '',
             });
             i++;
-        });
-
-        this.teams = this.$teams.state.myTeams.filter(
-            (t) => t.gameId === this.tournament.game?._id,
-        );
-        this.teams.forEach((t) => {
-            if (
-                t.players.length >= this.tournament.teamSize.min &&
-                t.players.length <= this.tournament.teamSize.max
-            ) {
-                this.eligibleTeams.push(t.id);
-            }
         });
     }
 

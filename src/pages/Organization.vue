@@ -404,16 +404,12 @@ export default class OrganizationDetails extends Vue {
     public async addMember(player?: any, discordId?: any) {
         this.searchField = '';
         this.loading.addMember = player?._id || discordId;
-        const result = (await this.$organizations.addMember({id: player?._id ?? discordId})) as Member;
+        await this.$organizations.addMember({id: player?._id ?? discordId});
         this.searchResult = {
             discord: [],
             members: [],
         };
-        if (result) {
-            this.tempAlert('successAdd', 4000);
-        } else {
-            this.tempAlert('failedAdd', 4000);
-        }
+        this.tempAlert('successAdd', 4000);
         this.loading.addMember = '';
     }
 

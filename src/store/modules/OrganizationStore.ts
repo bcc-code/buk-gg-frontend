@@ -67,15 +67,14 @@ export class OrganizationStore extends CrudStore<
                 }
                 return result;
             },
-            addMember: async ({ commit }, member: Member) => {
+            addMember: async ({ commit }, member: {id: string}) => {
                 const result = await api.organizations.addMember(
                     this.current.id,
                     member,
                 );
-                if (result) {
-                    this.commit('addMember', member);
-                    this.commit('removePendingMember', member.player._id);
-                }
+                // if (result) {
+                //     this.commit('removePendingMember', member.id);
+                // }
                 return result;
             },
             joinRequest: async ({ commit }, player: Player) => {

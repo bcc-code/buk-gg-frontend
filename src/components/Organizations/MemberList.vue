@@ -14,8 +14,8 @@
                         <th>{{ !edit ? 'Role' : 'Edit'}}</th>
                     </template>
                     <template slot-scope="{ row }">
-                        <td :style="rowStyle[row.role]">{{ row.player.nickname }}</td>
-                        <td v-if="!edit" :style="rowStyle[row.role]">{{ row.player.discordUser }}</td>
+                        <td :style="rowStyle[row.role]">{{ row.player ? row.player.nickname : undefined }}</td>
+                        <td v-if="!edit" :style="rowStyle[row.role]">{{ row.player ? row.player.discordUser : undefined }}</td>
                         <td :style="rowStyle[row.role]">
                             <base-dropdown
                                 v-if="edit && row.role !== 'owner' && loading.selectRole != row.player._id && $session.state.currentUser._id !== row.player._id"
@@ -145,7 +145,7 @@ import { BaseTable, LoadingButton } from '../../components';
             return this.$organizations.current?.pending || [];
         },
         isOwner() {
-            return ['owner', 'officer'].includes(this.$organizations.current?.members?.find((m) => m.player._id === this.$session.state.currentUser._id)?.role);
+            return ['owner', 'officer'].includes(this.$organizations.current?.members?.find((m) => m.player?._id === this.$session.state.currentUser._id)?.role);
         },
         isMember() {
             return this.members.find((m) => m.player._id === this.$session.state.currentUser._id) ? true : false;
