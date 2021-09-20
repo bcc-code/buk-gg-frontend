@@ -24,7 +24,7 @@
                     <img
                         slot="image-bottom"
                         class="card-img-bottom"
-                        src="/img/rc2020-header.jpg"
+                        src="/img/hc2021-header.jpg"
                         style="max-height: 290px; object-fit: cover;"
                     />
                 </card>
