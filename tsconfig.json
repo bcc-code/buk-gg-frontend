@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "wwwroot",
         "target": "es5",
-        "module": "es2020",
+        "module": "es2015",
         "jsx": "preserve",
         "importHelpers": true,
         "moduleResolution": "node",

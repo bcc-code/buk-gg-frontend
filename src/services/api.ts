@@ -3,6 +3,7 @@ import Vue, { PluginObject } from 'vue';
 
 import { LocaleMessageObject } from 'vue-i18n';
 import { Organization, Team } from '@/classes';
+import { ApiUser, ApiUserUpdateOptions, ApiOrganization, ApiOrganizationCreateOptions, ApiOrganizationUpdateOptions, ApiTeam, ApiTeamCreateOptions, ApiTeamUpdateOptions, ApiMemberUpdateOptions } from 'buk-gg';
 
 export class Api implements PluginObject<any> {
     public localization = {
@@ -10,47 +11,49 @@ export class Api implements PluginObject<any> {
             return http.get<LocaleMessageObject>(`localization/${lang}`);
         },
     };
-    // Session //
+
     public session = {
         getCurrentSession() {
-            return http.get<Player>('Session');
+            return http.get<ApiUser>('Session');
         },
-        updateCurrentUser(user: Player) {
-            return http.put<User>('Session', user);
+        updateCurrentUser(options: ApiUserUpdateOptions) {
+            return http.put<ApiUserUpdateOptions>('Session', options);
         },
     };
 
-    // Tournaments //
-    public tournaments = {
+    public organizations = {
         getAll() {
-            return http.get<TournamentInfo[]>('tournaments');
+            return http.get<ApiOrganization[]>('Organizations');
         },
-        getTournament(tournamentId: string) {
-            return http.get<TournamentInfo>(`tournaments/${tournamentId}`);
+        create(options: ApiOrganizationCreateOptions) {
+            return http.post<ApiOrganization>('Organizations', options);
         },
-        getStages(toornamentId: string) {
-            return http.get<Stage[]>(`tournaments/${toornamentId}/stages`);
+        update(id: string, options: ApiOrganizationUpdateOptions) {
+            return http.patch<void>(`Organizations/${id}`, options);
         },
-        getParticipants(toornamentId: string) {
-            return http.get<any[]>(`tournaments/${toornamentId}/participants`);
+        join(id: string) {
+            return http.get<void>(`Organizations/${id}`);
         },
-        getEligibleTeamsForCaptain(tournamentId: string) {
-            return http.get<TeamModel[]>(`tournaments/${tournamentId}/captain`);
+    };
+
+    public teams = {
+        getMine() {
+            return http.get<ApiTeam>('Teams');
         },
-        addTeamToTournament(tournamentId: string, team: Team, information: string[]) {
-            return http.put<boolean>(
-                `tournaments/${tournamentId}/teams`,
-                {item: team.toModel(), information},
-            );
+        create(options: ApiTeamCreateOptions) {
+            return http.post<ApiTeam>('Teams', options);
         },
-        addPlayerToTournament(tournamentId: string, player: Player, information: string[]) {
-            return http.put<boolean>(
-                `tournaments/${tournamentId}/players`,
-                {item: player, information},
-            );
+        getInGame(gameId: string) {
+            return http.get<ApiTeam[]>(`Teams/Game/${gameId}`);
         },
-        getAdminInfo(tournamentId: string) {
-            return http.get<TournamentAdminInfo>(`tournaments/${tournamentId}/admin`);
+        getInOrganization(organizationId: string) {
+            return http.get<ApiTeam[]>(`Teams/Organization/${organizationId}`);
+        },
+        delete(id: string) {
+            return http.delete<void>(`Teams/${id}`);
+        },
+        update(id: string, options: ApiTeamUpdateOptions) {
+            return http.patch<void>(`Teams/${id}`, options);
         },
     };
 
@@ -69,123 +72,6 @@ export class Api implements PluginObject<any> {
         },
         isConnected(id: string) {
             return http.get<boolean>(`discord/connected/${id}`);
-        },
-    };
-
-    public organizations = {
-        uploadImage(organizationId: string, image: any) {
-            return http.put<string>(`organizations/${organizationId}/image`, {
-                image: image.split(',')[1],
-            });
-        },
-        async leaveOrganization(organizationId: string) {
-            return http.delete<boolean>(`organizations/${organizationId}/leave`);
-        },
-        async saveOrganization(organization: Organization) {
-            return new Organization(
-                await http.put<OrganizationModel>(
-                    `organizations`,
-                    organization.toModel(),
-                ),
-            );
-        },
-        async createOrganization(organization: Organization) {
-            return new Organization(
-                await http.put<OrganizationModel>(
-                    `organizations/create`,
-                    organization.toModel(),
-                ),
-            );
-        },
-        async getOrganizations() {
-            const orgs: Organization[] = [];
-            (
-                await http.get<OrganizationModel[]>(`organizations`)
-            ).forEach((org) => orgs.push(new Organization(org)));
-            return orgs;
-        },
-        async getOrganization(organizationId: string) {
-            return new Organization(
-                await http.get<OrganizationModel>(
-                    `organizations/${organizationId}`,
-                ),
-            );
-        },
-        async getPlayerOrganizations(player: Player, role?: string) {
-            const orgs: Organization[] = [];
-            (
-                await http.get<OrganizationModel[]>(`organizations/Mine`)
-            ).forEach((org) => orgs.push(new Organization(org)));
-            return orgs;
-        },
-        // MEMBERS
-        getMember(player: Player) {
-            return http.post<Member>(`organizations/Members`, player);
-        },
-        addMember(organizationId: string, member: {id: string}) {
-            return http.put<Member>(
-                `organizations/${organizationId}/Members`, member,
-            );
-        },
-        updateMember(organizationId: string, member: Member) {
-            return http.patch<Member>(
-                `organizations/${organizationId}/members`,
-                member,
-            );
-        },
-        deleteMember(organizationId: string, member: Member) {
-            return http.delete<boolean>(
-                `organizations/${organizationId}/members/${member.player._id}`,
-            );
-        },
-        addPendingMember(organizationId: string, player: Player, type: string) {
-            return http.put<boolean>(`organizations/${organizationId}/pending/${type}`, player);
-        },
-        removePendingMember(organizationId: string, playerId: string) {
-            return http.delete<boolean>(`organizations/${organizationId}/pending/${playerId}`);
-        },
-        // PLAYERS
-        searchForPlayers(search: string) {
-            return http.get<Player[]>(`organizations/players/${search}`);
-        },
-    };
-
-    public teams = {
-        async getTeamsInOrganization(organizationId: string) {
-            const teams: Team[] = [];
-            (
-                await http.get<TeamModel[]>(`teams/${organizationId}`)
-            ).forEach((team) => teams.push(new Team(team)));
-            return teams;
-        },
-        async getTeams() {
-            const teams: Team[] = [];
-            (await http.get<TeamModel[]>(`teams/`)).forEach((team) => teams.push(new Team(team)));
-            return teams;
-        },
-        async getTeamsInGame(gameId: string) {
-            const teams: Team[] = [];
-            (
-                await http.get<TeamModel[]>(`teams/game/${gameId}`)
-            ).forEach((team) => teams.push(new Team(team)));
-            return teams;
-        },
-        async addTeam(team: Team) {
-            return new Team(
-                await http.put<TeamModel>(`teams/add`, team.toModel()),
-            );
-        },
-        async updateTeam(team: Team) {
-            return new Team(
-                await http.put<TeamModel>(`teams/update`, team.toModel()),
-            );
-        },
-        deleteTeam(team: Team) {
-            return http.delete(`teams/delete/${team.id}`);
-        },
-        // GAMES
-        getGames() {
-            return http.get<Game[]>(`teams/games`);
         },
     };
 

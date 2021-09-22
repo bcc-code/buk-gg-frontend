@@ -1,6 +1,6 @@
 {
     "name": "buk-gg",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
@@ -16,6 +16,7 @@
         "epic-spinners": "^1.1.0",
         "eslint": "^7.17.0",
         "lodash": "^4.17.20",
+        "tslib": "^2.3.1",
         "vue": "^2.6.12",
         "vue-class-component": "^6.3.2",
         "vue-i18n": "^8.21.0",
