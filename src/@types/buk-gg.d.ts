@@ -8,10 +8,11 @@ declare module 'buk-gg' {
         maxPlayers: number;
         minPlayers: number;
         contacts: ApiContact[];
-        winner: ApiTeam;
         signupType: ParticipantType;
         requiredInfo: string[];
+        winner: ApiTeam | null;
         teams: ApiTeam[];
+        signedUp: boolean;
     }
 
     type ParticipantType = 'team' | 'player';
@@ -20,8 +21,6 @@ declare module 'buk-gg' {
         id: string;
         name: string;
         organizationId: string;
-        captainId: string;
-        playerIds: string[];
         members: ApiMember[];
     }
 
@@ -86,7 +85,6 @@ declare module 'buk-gg' {
     interface ApiOrganization {
         id: string;
         name: string;
-        teams?: ApiTeam[];
         members: ApiMember[];
         invitations: ApiInvitation[];
         logo: string;

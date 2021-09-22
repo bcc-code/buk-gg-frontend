@@ -2,8 +2,7 @@ import http from '@/services/http';
 import Vue, { PluginObject } from 'vue';
 
 import { LocaleMessageObject } from 'vue-i18n';
-import { Organization, Team } from '@/classes';
-import { ApiUser, ApiUserUpdateOptions, ApiOrganization, ApiOrganizationCreateOptions, ApiOrganizationUpdateOptions, ApiTeam, ApiTeamCreateOptions, ApiTeamUpdateOptions, ApiMemberUpdateOptions } from 'buk-gg';
+import { ApiUser, ApiUserUpdateOptions, ApiOrganization, ApiOrganizationCreateOptions, ApiOrganizationUpdateOptions, ApiTeam, ApiTeamCreateOptions, ApiTeamUpdateOptions, ApiMemberUpdateOptions, ApiTournament, ApiParticipant } from 'buk-gg';
 
 export class Api implements PluginObject<any> {
     public localization = {
@@ -57,12 +56,18 @@ export class Api implements PluginObject<any> {
         },
     };
 
-    public events = {
+    public tournaments = {
         getAll() {
-            return http.get<IEvent[]>('events');
+            return http.get<ApiTournament[]>('Tournaments');
         },
-        getEvent(eventId: string) {
-            return http.get<IEvent>(`events/${eventId}`);
+        getParticipants(id: string) {
+            return http.get<ApiParticipant[]>(`Tournaments/${id}/Participants`);
+        },
+        register(id: string, information: string[]) {
+            return http.post<void>(`Tournaments/${id}/Participants`, information)
+        },
+        registerTeam(id: string, teamId: string, information: string[]) {
+            return http.post<void>(`Tournaments/${id}/Participants/${teamId}`, information)
         },
     };
 

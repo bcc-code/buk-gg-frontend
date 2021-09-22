@@ -1,6 +1,10 @@
-{
+module.exports = {
     "defaultSeverity": "warning",
-    "extends": ["tslint:recommended"],
+    extends: [
+        'plugin:vue/essential',
+        'eslint:recommended',
+        '@vue/typescript'
+    ],
     "linterOptions": {
         "exclude": ["node_modules/**"]
     },
