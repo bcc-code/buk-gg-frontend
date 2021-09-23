@@ -10,4 +10,12 @@ export default class Member implements ApiMember {
         this.role = i.role;
         this.player = i.player;
     }
+
+    public get toModel(): ApiMember {
+        return {
+            playerId: this.playerId,
+            role: this.role,
+            player: this.player,
+        }
+    }
 }

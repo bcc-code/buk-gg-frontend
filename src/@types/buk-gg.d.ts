@@ -95,12 +95,12 @@ declare module 'buk-gg' {
     }
 
     interface ApiOrganizationUpdateOptions {
-        name: string;
+        name?: string;
         /**
          * @summary Base64 encoded image.
          */
-        image: string;
-        members: ApiMemberUpdateOptions;
+        image?: string;
+        members?: ApiMemberUpdateOptions;
     }
 
     interface ApiMemberUpdateOptions {

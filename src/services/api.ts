@@ -37,7 +37,7 @@ export class Api implements PluginObject<any> {
 
     public teams = {
         getMine() {
-            return http.get<ApiTeam>('Teams');
+            return http.get<ApiTeam[]>('Teams');
         },
         create(options: ApiTeamCreateOptions) {
             return http.post<ApiTeam>('Teams', options);

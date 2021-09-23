@@ -1,5 +1,5 @@
 import { ApiTeam } from 'buk-gg';
-import { Member } from '.';
+import { Member } from '..';
 
 export default class Team implements ApiTeam {
     public id;
