@@ -1,4 +1,15 @@
 declare module 'buk-gg' {
+    interface ApiObject {
+        id: string;
+        name: string;
+        members: ApiMember[];
+    }
+
+    interface ApiUpdateOptions {
+        name?: string;
+        members?: ApiMemberUpdateOptions;
+    }
+
     interface ApiTournament {
         id: string;
         title: string;
@@ -17,11 +28,8 @@ declare module 'buk-gg' {
 
     type ParticipantType = 'team' | 'player';
 
-    interface ApiTeam {
-        id: string;
-        name: string;
+    interface ApiTeam extends ApiObject {
         organizationId: string;
-        members: ApiMember[];
     }
 
     interface ApiTeamCreateOptions {
@@ -31,9 +39,7 @@ declare module 'buk-gg' {
         gameId: string;
     }
 
-    interface ApiTeamUpdateOptions {
-        name: string;
-        members: ApiMemberUpdateOptions;
+    interface ApiTeamUpdateOptions extends ApiUpdateOptions {
     }
 
     interface ApiPlayer {
@@ -82,10 +88,7 @@ declare module 'buk-gg' {
         team?: ApiTeam;
     }
 
-    interface ApiOrganization {
-        id: string;
-        name: string;
-        members: ApiMember[];
+    interface ApiOrganization extends ApiObject {
         invitations: ApiInvitation[];
         logo: string;
     }
@@ -94,13 +97,11 @@ declare module 'buk-gg' {
         name: string;
     }
 
-    interface ApiOrganizationUpdateOptions {
-        name?: string;
+    interface ApiOrganizationUpdateOptions extends ApiUpdateOptions {
         /**
          * @summary Base64 encoded image.
          */
         image?: string;
-        members?: ApiMemberUpdateOptions;
     }
 
     interface ApiMemberUpdateOptions {
