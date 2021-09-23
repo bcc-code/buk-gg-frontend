@@ -3,9 +3,9 @@
         <base-button
             type="success"
             class="center-mobile"
-            :disabled="isSignedUp || signedUp"
+            :disabled="isSignedUp"
             @click="viewModal = true"
-            >{{ !(signedUp || isSignedUp) ? $t('registration.title').toUpperCase() : "SIGNED UP"}}</base-button
+            >{{ !(isSignedUp) ? $t('registration.title').toUpperCase : "SIGNED UP"}}</base-button
         >
         <base-alert type="success" v-if="successAdd"
             >SUCCESSFULLY SIGNED UP</base-alert
@@ -16,19 +16,19 @@
             modal-classes="modal-dialog-centered modal-sm"
         >
             <card
-                v-if="tournament.signupType == 'team'"
+                v-if="tournament?.signupType === 'team'"
                 style="margin-bottom: 0;"
             >
-                <template slot="header">{{ $t('tournaments.myTeams').toUpperCase() }}</template>
+                <template slot="header">{{ $t('tournaments.myTeams').toUpperCase }}</template>
                 <template>
                 <div
                     class="card-body text-white"
-                    v-if="!$session.state.currentUser.phoneNumber"
+                    v-if="!$session.state.currentUser?.phoneNumber"
                 >
                     {{ $t('tournaments.teamRequiredInformation') }}
                     <base-input
                         :label="$t('registration.phoneNumber')"
-                        v-model="player.phoneNumber"
+                        v-model="user.phoneNumber"
                         :placeholder="$t('registration.phoneNumber')"
                     >
                         <small slot="helperText" class="text-muted">{{
@@ -36,11 +36,10 @@
                         }}</small>
                     </base-input>
                     <base-button
-
-                        :loading="loading.saveUser"
+                        :loading="user.loading"
                         type="info"
-                        @click="savePhonenumber()"
-                        >{{ $t('common.save').toUpperCase() }}</base-button
+                        @click="user.save()"
+                        >{{ $t('common.save').toUpperCase }}</base-button
                     >
                 </div>
                     <div class="card-body text-white" v-else>Only showing your teams in {{ tournament.title }}.<br/>Required members: {{ tournament.teamSize.min }}</div>
@@ -186,8 +185,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Modal, BaseAlert, BaseTable } from '../../components';
-import { Team } from '../../classes';
-import api from '../../services/api';
+import Tournament from '@/classes/Tournament';
 
 @Component({
     props: {
@@ -203,115 +201,23 @@ import api from '../../services/api';
         BaseAlert,
         BaseTable,
     },
-    computed: {
-        fieldsNotAnswered() {
-            if (this.requiredFields?.find((f) => !f.answer)) {
-                return true;
-            }
-            return false;
-        },
-        isSignedUp() {
-            if (this.tournament.signupType === 'solo') {
-                if (this.tournament.playerIds?.includes(this.player._id)) { return true; }
-            }
-            return false;
-        },
-    },
 })
 export default class TournamentRegistration extends Vue {
-    public player: User = {} as User;
-    public tournament: TournamentInfo;
+    public tournament?: Tournament;
 
-    public get teams(): Team[] {
-        return this.$teams.state.teams?.filter((t) => t.gameId === this.tournament.game._id) ?? [];
-    }
-    public get eligibleTeams() {
-        return this.teams.filter(t => t.players.length >= this.tournament.teamSize.min && t.players.length <= this.tournament.teamSize.max);
-    }
-    public successAdd: boolean = false;
-    public viewModal: boolean = false;
-    public viewInfoModal: boolean = false;
-    public requiredFields: Array<{
-        number: number;
-        question: string;
-        answer: string;
-    }> = [];
-    public selectedTeam: Team = {} as Team;
-    public loading = {
-        saveUser: false,
-    };
-    public signedUp = false;
+    public successAdd = false;
+    public viewModal = false;
 
-    public async mounted() {
-        this.player = Object.assign({}, this.$session.state.currentUser);
-        let i = 0;
-        this.tournament.requiredInformation?.forEach((req) => {
-            this.requiredFields.push({
-                number: i,
-                question: req,
-                answer: '',
-            });
-            i++;
-        });
+    public get isSignedUp() {
+        return this.tournament?.signedUp === true;
     }
 
-    public async savePhonenumber() {
-        this.loading.saveUser = true;
-        if (this.player?.phoneNumber) {
-            await this.$session.updateUser(this.player);
-        }
-        this.loading.saveUser = false;
+    public get user() {
+        return this.$session.currentUser;
     }
 
-    public fillInfo(team: Team) {
-        this.selectedTeam = team;
-        if (this.tournament.requiredInformation?.length > 0) {
-            this.viewModal = false;
-            this.viewInfoModal = true;
-        } else {
-            this.teamSignUp(team);
-        }
-    }
-
-    public async playerSignUp(player?: Player) {
-        const information = [];
-        this.requiredFields?.forEach((field) => {
-            information.push(`${field.question} | ${field.answer}`);
-        });
-        player = player || this.$session.state.currentUser;
-        const result = await this.$tournaments.addPlayerToTournament(
-            this.$tournaments.current.id,
-            player,
-            information,
-        );
-        if (result) {
-            this.successAdd = true;
-            this.signedUp = true;
-            setTimeout(() => {
-                this.successAdd = false;
-            }, 5000);
-        }
-        this.viewModal = false;
-    }
-
-    public async teamSignUp(row: any) {
-        const information = [];
-        this.requiredFields?.forEach((field) => {
-            information.push(`${field.question} | ${field.answer}`);
-        });
-
-        const result = await this.$tournaments.addTeamToTournament({
-            tournamentId: this.$tournaments.current.id,
-            team: this.selectedTeam,
-            information,
-        });
-        if (result) {
-            this.successAdd = true;
-            setTimeout(() => {
-                this.successAdd = false;
-            }, 5000);
-        }
-        this.viewInfoModal = false;
+    public get teams() {
+        return this.tournament?.teams ?? [];
     }
 }
 </script>

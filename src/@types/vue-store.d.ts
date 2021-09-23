@@ -4,7 +4,6 @@ import { RootState, RootStore } from '@/store';
 import { EventBus } from '@/services/eventBus';
 import { Api } from '@/services/api';
 import { TournamentStore } from '@/store/modules/TournamentStore';
-import { EventStore } from '@/store/modules/EventStore';
 import { OrganizationStore } from '@/store/modules/OrganizationStore';
 import { TeamStore } from '@/store/modules/TeamStore';
 
@@ -15,7 +14,6 @@ declare module 'vue/types/vue' {
         $session: SessionStore;
         $tournaments: TournamentStore;
         $sidebar: any;
-        $ievents: EventStore;
         $organizations: OrganizationStore;
         $teams: TeamStore;
 

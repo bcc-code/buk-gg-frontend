@@ -121,6 +121,7 @@
     </div>
 </template>
 <script lang="ts">
+import { Member } from '@/classes';
 import { Vue, Component } from 'vue-property-decorator';
 import { BaseTable, LoadingButton } from '../../components';
 
@@ -139,27 +140,10 @@ import { BaseTable, LoadingButton } from '../../components';
             default: () => [],
         },
     },
-    computed: {
-        
-        pending() {
-            return this.$organizations.current?.pending || [];
-        },
-        isOwner() {
-            return ['owner', 'officer'].includes(this.$organizations.current?.members?.find((m) => m.player?._id === this.$session.state.currentUser._id)?.role);
-        },
-        isMember() {
-            return this.members.find((m) => m.player._id === this.$session.state.currentUser._id) ? true : false;
-        },
-        isPending() {
-            return this.pending.find((m) => m.player._id === this.$session.state.currentUser._id) ? true : false;
-        },
-    },
 })
-
 export default class OrganizationMemberList extends Vue {
-    public edit: boolean;
-    public members: Member[];
-    public pending: PendingMember[];
+    public edit?: boolean;
+    public members?: Member[];
     public loading = {
         selectRole: '',
         deleteMember: '',
@@ -173,53 +157,6 @@ export default class OrganizationMemberList extends Vue {
         captain: 'color: #ff9c2b',
         member: '',
     };
-
-    public async setRole(player: Player, role: string) {
-        // this.organization.members.find(m => m.player._id == player._id).role = role;
-        this.loading.selectRole = player._id;
-        const obj: Member = {
-            _key: player._id,
-            player,
-            role,
-        };
-        await this.$organizations.updateMember(obj);
-        this.loading.selectRole = '';
-        // this.$organizations.saveOrganization(this.organization);
-    }
-
-    public async deleteMember(member: Member) {
-        this.loading.deleteMember = member.player._id;
-        const result = await this.$organizations.removeMember(member);
-        this.loading.deleteMember = '';
-    }
-
-    public async deletePendingMember(player: Player) {
-        this.loading.deleteMember = player._id;
-        await this.$organizations.removePendingMember(player._id);
-        this.loading.deleteMember = '';
-    }
-
-    public async addMember(player: Player) {
-        this.loading.addMember = player._id;
-        await this.$organizations.addMember({id: player._id});
-        this.loading.addMember = '';
-    }
-
-    public async requestToJoin(player?: Player) {
-        this.loading.joinRequest = true;
-        if (!player) {
-            player = this.$session.state.currentUser;
-        }
-        await this.$organizations.joinRequest(player);
-
-        this.loading.joinRequest = false;
-    }
-
-    public async leaveOrganization() {
-        this.loading.leaveOrganization = true;
-        await this.$organizations.leaveOrganization(this.$organizations.current?.id);
-        this.loading.leaveOrganization = false;
-    }
 }
 
 </script>
