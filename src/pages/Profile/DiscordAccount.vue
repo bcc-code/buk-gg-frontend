@@ -71,21 +71,27 @@ import BaseAlert from '@/components/BaseAlert.vue';
 import Modal from '@/components/Modal.vue';
 import Discord from '../../services/discord';
 import api from '../../services/api';
-export default {
+import User from '@/classes/User';
+
+@Component({
     components: {
         BaseAlert,
     },
-    data() {
-        return {
-            type: ['', 'info', 'success', 'warning', 'danger'],
-            updatedRoles: false,
-        };
-    },
-    computed: {
-        player() {
-            return this.$session.state?.currentUser || null;
+    props: {
+        user: {
+            type: Object,
+            default: () => {
+                return {};
+            },
         },
     },
+})
+export default class DiscordAccount extends Vue {
+    public type = ['', 'info', 'success', 'warning', 'danger'];
+    public updatedRoles = false;
+    public get player() {
+        return this.$session.state.currentUser;
+    }
     async mounted() {
         if (await Discord.completeDiscordLogin()) {
             const discordUser = Discord.discordUser;
@@ -97,34 +103,24 @@ export default {
                 // this.$bvModal.show("discord.modal0");
             }
         }
-    },
-    methods: {
-        async disconnectDiscordLogin() {
-            Discord.disconnectDiscordLogin();
-            if (this.player) {
-                await this.$session.removeDiscord();
-            }
-        },
-        initDiscordLogin() {
-            Discord.startDiscordLogin();
-        },
-        openDiscord() {
-            window.open(this.$t('discord.invite'));
-        },
-        pushToDiscord() {
-            if (this.$route.name !== 'discord') {
-                this.$router.push('/discord');
-            }
-        },
-    },
-    props: {
-        user: {
-            type: Object,
-            default: () => {
-                return {};
-            },
-        },
-    },
+    }
+    async disconnectDiscordLogin() {
+        Discord.disconnectDiscordLogin();
+        if (this.player) {
+            this.player.discordId = undefined
+        }
+    }
+    initDiscordLogin() {
+        Discord.startDiscordLogin();
+    }
+    openDiscord() {
+        window.open(this.$t('discord.invite').toString());
+    }
+    pushToDiscord() {
+        if (this.$route.name !== 'discord') {
+            this.$router.push('/discord');
+        }
+    }
 };
 </script>
 <style></style>

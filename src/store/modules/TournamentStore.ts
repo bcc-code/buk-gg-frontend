@@ -1,9 +1,7 @@
 import api from '@/services/api';
 import { RootStore } from '@/store';
 import CrudStore, { CrudState } from './base/CrudStore';
-import { Team } from '@/classes';
-import Tournament from '@/classes/Tournament';
-import BaseTournament from '@/classes/BaseTournament';
+import { BaseTournament, Tournament } from '@/classes';
 
 export interface TournamentState extends CrudState<Tournament, string> {
     tournaments: BaseTournament[];

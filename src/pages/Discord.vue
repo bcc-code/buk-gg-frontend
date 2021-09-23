@@ -11,7 +11,7 @@
                 <div class="card-body page-details-body">
                     <div
                         v-html="
-                            $t('discord.body').replace(/<p><\/p>/g, '<br/>')
+                            $t('discord.body').toString().replace(/<p><\/p>/g, '<br/>')
                         "
                     ></div>
                 </div>

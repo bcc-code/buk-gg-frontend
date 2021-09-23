@@ -2,7 +2,7 @@
     <div>
         <card>
             <!-- <h5 slot="header" class="card-title">Connections</h5> -->
-            <base-table :data="player.moreDiscordUsers">
+            <base-table :data="player?.moreDiscordUsers">
                 <template slot="columns">
                     <th>Name</th>
                     <th>DiscordId</th>
@@ -17,7 +17,7 @@
                             type="danger"
                             icon
                             ><i
-                                @click="removeDiscord(row)"
+                                @click="removeDiscord(row.discordId)"
                                 class="fas fa-times"
                         /></base-button>
                     </td>
@@ -64,7 +64,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import { Modal, BaseTable } from '../../components';
 import Discord from '../../services/discord';
 import api from '../../services/api';
-import { v4 as uuidv4 } from 'uuid';
 
 @Component({
     components: {
@@ -77,21 +76,23 @@ export default class MoreDiscords extends Vue {
     public addDiscord: boolean = false;
 
     public newDiscordName: string = '';
-
     public newDiscordId: string = '';
 
-    public player: Player = this.$session.state.currentUser;
+    public get player() {
+        return this.$session.state.currentUser
+    };
 
     public loading: boolean = false;
 
     public async addDiscordUser() {
         this.loading = true;
-        if (this.player.enableMoreDiscords === true) {
-            await this.$session.addDiscordUser({
-                _key: uuidv4(),
+        if (this.player?.enableMoreDiscords === true) {
+            this.player.moreDiscordUsers ??= [];
+            this.player.moreDiscordUsers.push({
                 name: this.newDiscordName,
                 discordId: this.newDiscordId,
-            } as ExtraDiscordUser);
+            });
+            await this.player.save();
         }
         this.loading = false;
         this.newDiscordName = '';
@@ -99,8 +100,13 @@ export default class MoreDiscords extends Vue {
         this.addDiscord = false;
     }
 
-    public async removeDiscord(discordUser: ExtraDiscordUser) {
-        await this.$session.removeDiscordUser(discordUser);
+    public async removeDiscord(id: string) {
+        this.loading = true;
+        if (this.player?.moreDiscordUsers.some(d => d.discordId === id)) {
+            this.player.moreDiscordUsers = this.player.moreDiscordUsers.filter(i => i.discordId !== id);
+            await this.player.save();
+        }
+        this.loading = false;
     }
 
 }

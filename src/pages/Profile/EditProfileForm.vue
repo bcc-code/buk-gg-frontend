@@ -1,6 +1,6 @@
 <template>
     <div>
-        <card>
+        <card v-if="player">
             <h5 slot="header" class="title">Edit Profile</h5>
             <div class="row">
                 <div class="col-md-4 pr-md-1">
@@ -70,9 +70,9 @@
 
             <div slot="footer">
                 <div class="">
-                    <loading-button type="primary" :func="() => saveProfile()" :title="$t('common.save').toUpperCase()"></loading-button>
+                    <loading-button type="primary" :func="() => saveProfile()" :title="$t('common.save').toString().toUpperCase()"></loading-button>
                     
-                    <base-button class="ml-2" type="danger" simple @click="$session.logout()">{{ $t('common.logoutButton').toUpperCase() }}</base-button>
+                    <base-button class="ml-2" type="danger" simple @click="$session.logout()">{{ $t('common.logoutButton').toString().toUpperCase() }}</base-button>
                     <!-- <base-checkbox @click="updatePrivacyPolicy()" v-model="player.agreeToPrivacyPolicy"><div v-html="$t('registration.agreeToTermsCheckbox')"></div></base-checkbox> -->
                 </div>
             </div>
@@ -89,45 +89,11 @@ import Discord from '../../services/discord';
 import BaseAlert from '@/components/BaseAlert.vue';
 import { LoadingButton } from '../../components';
 
-export default {
+@Component({
     components: {
         Modal,
         BaseAlert,
         LoadingButton,
-    },
-    data() {
-        return {
-            updateKey: 0,
-            player: {},
-            agreeToPrivacyPolicy: false,
-            agreeToPrivacyPolicyButton: 'warning',
-            failedSave: false,
-        };
-    },
-    async mounted() {
-        this.player = Object.assign(
-            {},
-            this.$session.state.currentUser || null,
-        );
-    },
-    methods: {
-        async saveProfile() {
-            if (this.player && this.player.isRegistered) {
-                await this.$session.updateUser(this.player);
-                this.failedSave = false;
-            } else {
-                this.failedSave = true;
-            }
-        },
-        updatePrivacyPolicy() {
-            this.player.agreeToPrivacyPolicy = !this.player
-                .agreeToPrivacyPolicy;
-            if (this.player.agreeToPrivacyPolicy) {
-                this.agreeToPrivacyPolicyButton = 'success';
-            } else {
-                this.agreeToPrivacyPolicyButton = 'danger';
-            }
-        },
     },
     props: {
         model: {
@@ -137,6 +103,22 @@ export default {
             },
         },
     },
+})
+export default class EditProfileForm extends Vue {
+    public failedSave = false;
+
+    public get player() {
+        return this.$session.state.currentUser;
+    }
+
+    async saveProfile() {
+        if (this.player && this.player.isRegistered) {
+            await this.player.save();
+            this.failedSave = false;
+        } else {
+            this.failedSave = true;
+        }
+    }
 };
 </script>
 <style></style>

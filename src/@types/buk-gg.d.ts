@@ -77,8 +77,8 @@ declare module 'buk-gg' {
         location: string;
         noNbIsStandard: boolean;
         isO18: boolean;
-        discordUser: string;
-        discordId: string;
+        discordUser?: string;
+        discordId?: string;
         discordIsConnected: boolean;
         enableMoreDiscords: boolean;
         moreDiscordUsers: Array<{

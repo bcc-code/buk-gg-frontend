@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import BaseTournament from '@/classes/BaseTournament';
+import { BaseTournament } from '@/classes';
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component({
