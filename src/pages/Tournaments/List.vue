@@ -2,7 +2,7 @@
     <div class="row tournament-list">
         <div class="col-12">
             <h1 class="page-header">
-                {{ $t('common.tournaments').toUpperCase() }}
+                {{ $t('common.tournaments').toUpperCase }}
             </h1>
         </div>
 
@@ -27,7 +27,9 @@ import TournamentCard from './Card.vue';
 export default class TournamentList extends Vue {
     public window = window;
     public mounted() {
-        this.$tournaments.loadAll();
+        if (!this.$tournaments.state.all.length) {
+            this.$tournaments.loadAll();
+        }
     }
 }
 </script>

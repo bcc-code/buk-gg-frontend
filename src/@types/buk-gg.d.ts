@@ -10,20 +10,30 @@ declare module 'buk-gg' {
         members?: ApiMemberUpdateOptions;
     }
 
-    interface ApiTournament {
+    interface ApiBaseTournament {
         id: string;
+        slug: string;
         title: string;
-        body: string;
-        registrationOpen: boolean;
+        logo: string;
         liveStream: string;
+        signedUp: boolean;
+        responsible: boolean;
+    }
+
+    interface ApiTournament extends ApiBaseTournament {
+        image: string;
+        body: string;
+        telegramLink: string;
+        registrationOpen: boolean;
         maxPlayers: number;
         minPlayers: number;
         contacts: ApiContact[];
         signupType: ParticipantType;
         requiredInfo: string[];
         winner: ApiTeam | null;
+        toornamentId: string;
         teams: ApiTeam[];
-        signedUp: boolean;
+        platform: string;
     }
 
     type ParticipantType = 'team' | 'player';
@@ -46,6 +56,14 @@ declare module 'buk-gg' {
         id: string;
         displayName: string;
         discordTag: string;
+        name: string;
+        phoneNumber: string;
+        location: string;
+        email: string;
+    }
+
+    interface ApiAdminPlayer extends ApiPlayer {
+
     }
 
     interface ApiUser {
@@ -84,7 +102,7 @@ declare module 'buk-gg' {
         type: ParticipantType;
         information: string[];
         toornamentId: string;
-        player?: ApiPlayer;
+        players: ApiAdminPlayer[];
         team?: ApiTeam;
     }
 

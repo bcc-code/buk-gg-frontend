@@ -3,8 +3,11 @@ import { RootStore } from '@/store';
 import CrudStore, { CrudState } from './base/CrudStore';
 import { Team } from '@/classes';
 import Tournament from '@/classes/Tournament';
+import BaseTournament from '@/classes/BaseTournament';
 
-export interface TournamentState extends CrudState<Tournament, string> {}
+export interface TournamentState extends CrudState<Tournament, string> {
+    tournaments: BaseTournament[];
+}
 
 export class TournamentStore extends CrudStore<
     Tournament,
@@ -15,20 +18,43 @@ export class TournamentStore extends CrudStore<
         super('tournaments', rootStore, {
             all: [],
             item: {},
+            tournaments: [],
         });
 
         this.mutations = {
             ...this.mutations,
+            tournaments: (state, tournaments: BaseTournament[]) => {
+                state.tournaments = tournaments;
+            }
         };
 
         this.actions = {
             ...this.actions,
+            load: async ({state}, id: string) => {
+                const tournament = state.tournaments.find(i => i.id === id || i.slug === id);
+                if (tournament) {
+                    this.setCurrent(tournament.id);
+                    if (!this.getItem(tournament.id)) {
+                        this.updateItem(new Tournament(await api.tournaments.get(tournament.id)));
+                    }
+                }
+            }
         };
 
         // GETTERS //
         this.getters = {
             ...this.getters,
+            tournaments: (state) => state.tournaments,
         };
+    }
+
+    private async loadTournaments() {
+        const tournaments = await api.tournaments.getAll();
+        this.commit('tournaments', tournaments.map(i => new BaseTournament(i)));
+    }
+
+    public load(id: string) {
+        return this.dispatch('load', id);
     }
 
     protected getItemId(item?: object | Tournament | undefined) {
@@ -37,6 +63,7 @@ export class TournamentStore extends CrudStore<
         }
     }
     protected async loadAllFromSource(): Promise<Tournament[]> {
-        return (await api.tournaments.getAll()).map(i => new Tournament(i));
+        await this.loadTournaments();
+        return [];
     }
 }

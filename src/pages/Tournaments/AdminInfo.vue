@@ -1,9 +1,9 @@
 <template>
     <div class="tournament-admin-info">
         <base-table
-            :data="tournament.soloPlayers || []"
+            :data="participants ?? []"
             :columns="['id', 'nickname', 'discordUser']"
-            v-if="tournament.signupType == 'solo'"
+            v-if="tournament.signupType === 'player'"
         >
             <template slot="columns">
                 <th>Name</th>
@@ -11,7 +11,7 @@
                 <th>Phone</th>
                 <th>Location</th>
                 <th>Discord</th>
-                <th v-for="field in tournament.requiredInformation" :key="field">{{field}}</th>
+                <th v-for="field in tournament.requiredInfo" :key="field">{{field}}</th>
             </template>
             <template slot-scope="{ row }">
                 <td>{{ row.item.name }}</td>
@@ -22,37 +22,35 @@
                 <td v-for="field in row.information" :key="field">{{field.split(' | ').splice(1).join(' | ')}}</td>
             </template>
         </base-table>
-        <base-table
-            :data="tournament.participantTeams || []"
-            :columns="['id', 'nickname', 'discordUser']"
-            v-if="tournament.signupType == 'team'"
-        >
-            <template slot="columns">
+        <table class="table tablesorter">   
+            <thead>
                 <th>Name</th>
                 <th>ToornamentId</th>
                 <th>Captain</th>
                 <th>Location</th>
                 <th>Organization</th>
                 <th>Players</th>
-                <th v-for="field in tournament.requiredInformation" :key="field">{{field}}</th>
-            </template>
-            <template slot-scope="{ row }">
-                <td>{{ row.item.name }}</td>
-                <td>{{ row.toornamentId }}</td>
-                <td style="cursor: pointer" @click="showCaptain(row.item.captain)">{{ row.item.captain ? row.item.captain.name : 'NO CAPTAIN' }}</td>
-                <td>{{ row.item.captain.location }}</td>
-                <td style="cursor: pointer" @click="$router.push(`/organization/${row.item.organization._id}`)">{{ row.item.organization ? row.item.organization.name : 'NO ORGANIZATION' }}</td>
-                <td><base-button  @click="showPlayers(row.item.players)">Players</base-button></td>
-                <td v-for="field in row.information" :key="field">{{field.split(' | ').splice(1).join(' | ')}}</td>
-            </template>
-        </base-table>
+                <th v-for="field in tournament.requiredInfo" :key="field">{{field}}</th>
+            </thead>
+            <tbody>
+                <tr v-for="p in Participants" :key="p.id">
+                    <td>{{ p.team?.name }}</td>
+                    <td>{{ p.toornamentId }}</td>
+                    <td style="cursor: pointer" @click="showCaptain(p)">{{ getCaptain(p) ? getCaptain(p)?.name : 'NO CAPTAIN' }}</td>
+                    <td>{{ getCaptain(p) }}</td>
+                    <td style="cursor: pointer" @click="$router.push(`/organization/${p.team?.organizationId}`)">{{ p.team?.name }}</td>
+                    <td><base-button  @click="showPlayers(p)">Players</base-button></td>
+                    <td v-for="field in p.information" :key="field">{{field.split(' | ').splice(1).join(' | ')}}</td>
+                </tr>
+            </tbody>
+        </table>
         <modal :show.sync="modal.captain"
             body-classes="p-0"
             modal-classes="modal-sm">
             <card style="margin-bottom: 0" type="user">
                 
                 <p class="card-text"></p>
-                <div class="author">
+                <div class="author" v-if="captain">
                     <div class="block block-one"></div>
                     <div class="block block-two"></div>
                     <div class="block block-three"></div>
@@ -68,7 +66,7 @@
                         {{ captain.name }}
                     </h3>
                     <h3 style="margin-bottom: 10px;">
-                        {{ captain.nickname }}
+                        {{ captain.displayName }}
                     </h3>
                     <h4>
                         <a
@@ -78,8 +76,8 @@
                         >
                     </h4>
                     <h4 v-if="captain.phoneNumber">{{ captain.phoneNumber }}</h4>
-                    <h4 type="primary" v-if="captain.discordUser">
-                        <i class="fab fa-discord"></i> {{ captain.discordUser }}
+                    <h4 type="primary" v-if="captain.discordTag">
+                        <i class="fab fa-discord"></i> {{ captain.discordTag }}
                     </h4>
                 </div>
                 <p></p>
@@ -125,7 +123,8 @@
 </template>
 
 <script lang="ts">
-import { LayoutPlugin } from 'bootstrap-vue';
+import User from '@/classes/User';
+import { ApiAdminPlayer, ApiParticipant, ApiTeam } from 'buk-gg';
 import { Component, Vue } from 'vue-property-decorator';
 import { BaseTable, Modal } from '../../components';
 import api from '../../services/api';
@@ -142,27 +141,41 @@ import UserCard from '../Profile/UserCard.vue';
 })
 
 export default class TournamentAdminDetails extends Vue {
-    public tournament: TournamentAdminInfo = {} as TournamentAdminInfo;
-    public captain: Player = {} as Player;
-    public players: Player[] = [];
     public modal = {
         captain: false,
         players: false,
     };
+    public captain?: ApiAdminPlayer;
+    public players?: ApiAdminPlayer[];
 
-    public async mounted() {
-        if (this.$route.params.tournamentId) {
-            this.tournament = await api.tournaments.getAdminInfo(this.$route.params.tournamentId);
-        }
+    public participants?: ApiParticipant[];
+
+    public get Participants() {
+        return this.participants ?? [];
     }
 
-    public showCaptain(captain: any) {
-        this.captain = captain;
+    public get tournament() {
+        if (!this.$tournaments.current)
+            throw new Error("Tournament not found");
+        return this.$tournaments.current;
+    }
+
+    public async mounted() {
+        this.participants = await api.tournaments.getParticipants(this.tournament.id);
+    }
+
+    public getCaptain(participant: ApiParticipant) {
+        return participant.players.find(p => p.id === participant.team?.members.find(m => m.role === "captain")?.playerId);
+    }
+
+    public showCaptain(participant: ApiParticipant) {
+        const captain = participant.team?.members.find(m => m.role === "captain");
+        this.captain = participant.players.find(p => p.id === captain?.playerId);
         this.modal.captain = true;
     }
 
-    public showPlayers(players: any) {
-        this.players = players;
+    public showPlayers(participant: ApiParticipant) {
+        this.players = participant.players;
         this.modal.players = true;
     }
 }

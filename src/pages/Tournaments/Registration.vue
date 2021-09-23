@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="tournament">
         <base-button
             type="success"
             class="center-mobile"
@@ -21,28 +21,28 @@
             >
                 <template slot="header">{{ $t('tournaments.myTeams').toUpperCase }}</template>
                 <template>
-                <div
-                    class="card-body text-white"
-                    v-if="!$session.state.currentUser?.phoneNumber"
-                >
-                    {{ $t('tournaments.teamRequiredInformation') }}
-                    <base-input
-                        :label="$t('registration.phoneNumber')"
-                        v-model="user.phoneNumber"
-                        :placeholder="$t('registration.phoneNumber')"
+                    <div
+                        class="card-body text-white"
+                        v-if="!$session.state.currentUser?.phoneNumber"
                     >
-                        <small slot="helperText" class="text-muted">{{
-                            $t('registration.phoneNumberDescription')
-                        }}</small>
-                    </base-input>
-                    <base-button
-                        :loading="user.loading"
-                        type="info"
-                        @click="user.save()"
-                        >{{ $t('common.save').toUpperCase }}</base-button
-                    >
-                </div>
-                    <div class="card-body text-white" v-else>Only showing your teams in {{ tournament.title }}.<br/>Required members: {{ tournament.teamSize.min }}</div>
+                        {{ $t('tournaments.teamRequiredInformation') }}
+                        <base-input
+                            :label="$t('registration.phoneNumber')"
+                            v-model="user.phoneNumber"
+                            :placeholder="$t('registration.phoneNumber')"
+                        >
+                            <small slot="helperText" class="text-muted">{{
+                                $t('registration.phoneNumberDescription')
+                            }}</small>
+                        </base-input>
+                        <base-button
+                            :loading="user.loading"
+                            type="info"
+                            @click="user.save()"
+                            >{{ $t('common.save').toUpperCase }}</base-button
+                        >
+                    </div>
+                    <div class="card-body text-white" v-else>Only showing your teams in {{ tournament.title }}.<br/>Required members: {{ tournament.minPlayers }}</div>
                     <base-table :data="teams" :columns="['name']" v-if="teams.length > 0">
                         <template slot="columns">
                             <th>Name</th>
@@ -52,29 +52,19 @@
                             <td>
                                 <base-button
                                     :type="
-                                        !eligibleTeams.includes(row.id)
+                                        !Tournament.isEligible(row)
                                             ? 'warning'
                                             : 'success'
                                     "
                                     :disabled="
-                                        !eligibleTeams.includes(row.id) ||
-                                        tournament.teams.find(
-                                            (t) => t._id === row.id,
-                                        )
-                                            ? true
-                                            : tournament.teams.find(
-                                                  (t) => t.id === row.id,
-                                              )
-                                            ? true
-                                            : false
+                                        !Tournament.isEligible(row) ||
+                                        Tournament.isSignedUp(row)
                                     "
                                     @click="fillInfo(row)"
                                     >{{
-                                        !eligibleTeams.includes(row.id)
+                                        !Tournament.isEligible(row)
                                             ? 'NOT ELIGIBLE'
-                                            : tournament.teams.find(
-                                                  (t) => t.id === row.id,
-                                              )
+                                            : Tournament.isSignedUp(row)
                                             ? 'SIGNED UP'
                                             : 'SIGN UP'
                                     }}</base-button
@@ -86,18 +76,18 @@
                 </template>
             </card>
             <card
-                v-if="tournament.signupType == 'solo'"
+                v-if="Tournament.signupType == 'player'"
                 style="margin-bottom: 0;"
             >
                 <h3>{{ $t('registration.title') }}</h3>
                 <div
                     class="card-body text-white"
-                    v-if="!$session.state.currentUser.phoneNumber"
+                    v-if="!user.phoneNumber"
                 >
                     {{ $t('tournaments.phoneNumberIsRequired') }}
                     <base-input
                         :label="$t('registration.phoneNumber')"
-                        v-model="player.phoneNumber"
+                        v-model="user.phoneNumber"
                         :placeholder="$t('registration.phoneNumber')"
                     >
                         <small slot="helperText" class="text-muted">{{
@@ -106,18 +96,18 @@
                     </base-input>
                     <base-button
 
-                        :loading="loading.saveUser"
+                        :loading="user.loading"
                         type="info"
-                        @click="savePhonenumber()"
-                        >{{ $t('common.save').toUpperCase() }}</base-button
+                        @click="user.save()"
+                        >{{ $t('common.save').toUpperCase }}</base-button
                     >
                 </div>
 
-                <div class="card-body" v-if="$session.state.currentUser.phoneNumber">
+                <div class="card-body" v-if="user.phoneNumber">
                     <div
                         class="text-white"
-                        v-for="field in requiredFields"
-                        :key="field.number"
+                        v-for="(field, i) in requiredFields"
+                        :key="i"
                     >
                         {{ field.question }}
                         <base-input
@@ -132,11 +122,11 @@
                     <base-button
                         type="success"
                         :disabled="
-                            !$session.state.currentUser.phoneNumber ||
-                            fieldsNotAnswered
+                            !user.phoneNumber ||
+                            !allAnswered
                         "
-                        v-if="$session.state.currentUser.phoneNumber"
-                        @click="playerSignUp()"
+                        v-if="user.phoneNumber"
+                        @click="Tournament.register(information)"
                         >Sign Up</base-button
                     >
                     <base-button
@@ -157,8 +147,8 @@
                 <div class="card-body">
                     <div
                         class="text-white"
-                        v-for="field in requiredFields"
-                        :key="field.number"
+                        v-for="(field, i) in requiredFields"
+                        :key="i"
                     >
                         {{ field.question }}
                         <base-input v-model="field.answer"></base-input>
@@ -167,9 +157,9 @@
                 <div class="card-body">
                     <base-button
                         type="success"
-                        :disabled="!$session.state.currentUser.phoneNumber"
-                        v-if="$session.state.currentUser.phoneNumber"
-                        @click="teamSignUp(selectedTeam)"
+                        :disabled="!user.phoneNumber"
+                        v-if="user.phoneNumber"
+                        @click="Tournament.register(information, selectedTeam)"
                         >Sign Up</base-button
                     >
                     <base-button
@@ -185,7 +175,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Modal, BaseAlert, BaseTable } from '../../components';
-import Tournament from '@/classes/Tournament';
+import Tournament from '@/classes/tournament/Tournament';
+import { Team } from '@/classes';
 
 @Component({
     props: {
@@ -207,6 +198,23 @@ export default class TournamentRegistration extends Vue {
 
     public successAdd = false;
     public viewModal = false;
+    public viewInfoModal = false;
+
+    public selectedTeam?: Team;
+
+    public mounted() {
+        this.requiredFields = this.Tournament.requiredInfo.map(i => {
+            return {
+                question: i,
+            }
+        });
+    }
+
+    public get Tournament() {
+        if (!this.tournament)
+            throw new Error("Tournament not found");
+        return this.tournament;
+    }
 
     public get isSignedUp() {
         return this.tournament?.signedUp === true;
@@ -219,6 +227,26 @@ export default class TournamentRegistration extends Vue {
     public get teams() {
         return this.tournament?.teams ?? [];
     }
+
+    public fillInfo(team: Team) {
+        this.selectedTeam = team;
+        this.viewInfoModal = true;
+    }
+    
+    public get allAnswered() {
+        return this.requiredFields.every((v) => v.answer !== undefined);
+    }
+
+    public get information() {
+        if (this.allAnswered)
+            return this.requiredFields.map(i => i.answer as string);
+
+        throw new Error("Not all answered");
+    }
+    public requiredFields: {
+        question: string;
+        answer?: string;
+    }[] = [];
 }
 </script>
 <style></style>

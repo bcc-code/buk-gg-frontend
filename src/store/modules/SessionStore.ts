@@ -44,7 +44,7 @@ export class SessionStore extends BaseStore<SessionState> {
         this.actions = {
             ...this.actions,
             loadCurrentSession: async (store): Promise<User> => {
-                const session = await api.session.getCurrentSession();
+                const session = new User(await api.session.getCurrentSession());
                 this.setCurrentSession(session);
                 return session;
             },
@@ -102,10 +102,7 @@ export class SessionStore extends BaseStore<SessionState> {
             ...this.getters,
             isLoggedIn: (state) =>
                 state.currentUser !== null && state.currentUser !== undefined,
-            currentUserEmail: (state) =>
-                state.currentUser ? state.currentUser.email || '' : '',
-            currentUserDisplayName: (state) =>
-                state.currentUser ? state.currentUser.displayName || '' : '',
+            currentUser: (state) => state.currentUser,
         };
     }
 
@@ -133,14 +130,5 @@ export class SessionStore extends BaseStore<SessionState> {
     // TYPED GETTERS //
     public get isLoggedIn(): boolean {
         return this.read('isLoggedIn');
-    }
-    public get currentUserEmail(): string {
-        return this.read('currentUserEmail');
-    }
-    public get currentUserDisplayName(): string {
-        return this.read('currentUserDisplayName');
-    }
-    public get authenticatedUserCanImpersonate(): boolean {
-        return this.read('authenticatedUserCanImpersonate');
     }
 }

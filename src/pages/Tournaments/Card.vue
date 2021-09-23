@@ -1,5 +1,5 @@
 <template>
-    <div class="tournament-card" :class="classes" @click="onClick()">
+    <div class="tournament-card" v-if="item" :class="classes" @click="onClick()">
         <div class="link-tile-title text-center">{{ item.title.toUpperCase() }}</div>
         <card
             style="padding-top: 100%"
@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts">
+import BaseTournament from '@/classes/BaseTournament';
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component({
@@ -40,14 +41,16 @@ import { Component, Vue } from 'vue-property-decorator';
         },
     },
 })
-export default class TournamentList extends Vue {
-    public item: TournamentInfo;
+export default class TournamentCard extends Vue {
+    public item?: BaseTournament;
+    public classes?: string;
 
     public onClick() {
-        this.$router.push({
-            name: 'tournament-details',
-            params: { tournamentId: this.item.slug },
-        });
+        if (this.item)
+            this.$router.push({
+                name: 'tournament-details',
+                params: { tournamentId: this.item.slug },
+            });
     }
 }
 </script>

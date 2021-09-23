@@ -5,7 +5,7 @@
                 <img
                     slot="image"
                     class="card-img-top"
-                    :src="tournament.mainImage ? tournament.mainImage + '?h=600' : ''"
+                    :src="tournament.image ? tournament.image + '?h=600' : ''"
                 />
                 <div
                     v-if="
@@ -29,20 +29,13 @@
                         >TELEGRAM</base-button
                     >
                     <base-button
-                        class="center-mobile ml-lg-2"
-                        v-if="tournament.registrationForm"
-                        type="secondary"
-                        @click="openRegistrationForm()"
-                        >{{ `${$t('registration.singleRegistration')}`.toUpperCase() }}</base-button
-                    >
-                    <base-button
                         class="center-mobile float-right"
                         type="primary"
                         v-if="tournament.platform">
                         {{ tournament.platform }}
                         </base-button>
                 </div>
-                <base-button v-if="currentUserIsResponsible" @click="$router.push({
+                <base-button v-if="tournament.responsible" @click="$router.push({
                     name: 'tournament-admin-info',
                     params: {tournamentId: tournament.id}
                 })">Get Info</base-button>
@@ -68,7 +61,6 @@
                     </div>
                     <div
                         class="embed-responsive embed-responsive-16by9"
-                        v-if="tournament.liveChat"
                     >
                         <iframe
                             frameborder="0"
@@ -99,7 +91,6 @@
                     </div>
                     <div
                         class="embed-responsive embed-responsive-16by9"
-                        v-if="tournament.liveChat"
                     >
                         <iframe
                             class="embed-responsive-item"
@@ -143,26 +134,6 @@
                                     height="330"
                                     style="width: 100%; max-width: 100%;"
                                     :src="`https://widget.toornament.com/tournaments/${tournament.toornamentId}/matches/schedule/?_locale=en_US&theme=dark`"
-                                    frameborder="0"
-                                    allowfullscreen="true"
-                                ></iframe>
-                            </div>
-                        </div>
-                        <div
-                            v-for="stage in tournament.stages"
-                            :key="stage.id"
-                            class="col-12 p-0 mb-3"
-                        >
-                            <div
-                                v-if="stage.id && tournament.toornamentId"
-                                class="col bg-dark text-light bg-light-variant p-0 pb-4 pt-4 m-0 p-lg-4"
-                            >
-                                <a :id="'stage-' + stage.id"></a>
-                                <h2 class="ml-4 ml-lg-0">{{ stage.name }}</h2>
-                                <iframe
-                                    height="600"
-                                    style="width: 100%; max-width: 100%;"
-                                    :src="`https://widget.toornament.com/tournaments/${tournament.toornamentId}/stages/${stage.id}?_locale=en_US&theme=dark`"
                                     frameborder="0"
                                     allowfullscreen="true"
                                 ></iframe>
@@ -223,8 +194,8 @@
                         {{ `${$t('common.contact')}`.toUpperCase() }}
                     </h3>
                     <div
-                        v-for="contact in tournament.contacts"
-                        :key="contact._key"
+                        v-for="(contact, i) in tournament.contacts"
+                        :key="i"
                     >
                         <h3 v-if="contact.name" style="margin-bottom: 10px;">
                             {{ contact.name }}
@@ -293,6 +264,7 @@ import { SemipolarSpinner } from 'epic-spinners';
 import { Team } from '../../classes';
 import RegistrationModal from './Registration.vue';
 import api from '../../services/api';
+import Tournament from '@/classes/tournament/Tournament';
 
 @Component({
     components: {
@@ -306,11 +278,16 @@ import api from '../../services/api';
 export default class TournamentDetails extends Vue {
     public viewRegistration: boolean = false;
     public currentUrl: string = document.location.hostname;
-    public tournament: TournamentInfo | any = { body: '', teams: [] };
     public eligibleTeams: string[] = [];
 
     public openRegistration() {
         this.viewRegistration = true;
+    }
+
+    public get tournament() {
+        if (!this.$tournaments.current)
+            throw new Error("Tournament not here")
+        return this.$tournaments.current;
     }
 
     public telegram() {
@@ -319,30 +296,16 @@ export default class TournamentDetails extends Vue {
         }
     }
 
-    public openRegistrationForm() {
-        if (this.tournament.registrationForm) {
-            window.open(this.tournament.registrationForm);
-        }
-    }
-
     public async mounted() {
         if (this.$route.params.tournamentId) {
-            await this.$tournaments.loadTournament(
+            await this.$tournaments.load(
                 this.$route.params.tournamentId,
             );
-            this.tournament = this.$tournaments.current;
-
-            console.log(this.tournament);
-            // this.teams = await this.$tournaments.getEligibleTeamsForCaptain(this.$tournaments.current.game._id);
         }
     }
 
     public get teams() {
         return this.tournament?.teams ?? [];
-    }
-
-    public get currentUserIsResponsible() {
-        return this.tournament?.responsibleId === this.$session.state.currentUser._id;
     }
 }
 </script>

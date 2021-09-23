@@ -57,6 +57,9 @@ export class Api implements PluginObject<any> {
     };
 
     public tournaments = {
+        get(id: string) {
+            return http.get<ApiTournament>(`Tournaments/${id}`);
+        },
         getAll() {
             return http.get<ApiTournament[]>('Tournaments');
         },
