@@ -25,7 +25,7 @@ export default class Organization implements ApiOrganization {
             id: this.id,
             invitations: this.invitations,
             logo: this.logo,
-            members: this.members.map(i => i.toModel),
+            members: this.members.map(i => i.getModel()),
             name: this.name,
         }
     }
