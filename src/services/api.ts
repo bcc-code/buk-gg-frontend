@@ -21,6 +21,9 @@ export class Api implements PluginObject<any> {
     };
 
     public organizations = {
+        get(id: string) {
+            return http.get<ApiOrganization>(`Organizations/${id}`)
+        },
         getAll() {
             return http.get<ApiOrganization[]>('Organizations');
         },

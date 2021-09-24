@@ -23,6 +23,18 @@ export class OrganizationStore extends CrudStore<
 
         this.actions = {
             ...this.actions,
+            load: async(_store, id: string) => {
+                let item = this.getItem(id);
+                if (!item) {
+                    const i = await api.organizations.get(id);
+
+                    item = new Organization(i);
+
+                    this.updateItem(item);
+                }
+
+                return item;
+            }
         };
 
         // GETTERS //
