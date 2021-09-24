@@ -23,7 +23,7 @@ export class TournamentStore extends CrudStore<
                 state.all = items;
             },
             addTeamToTournament: (state: TournamentState, item: TeamModel) => {
-                this.current.teams.push(item);
+                this.current.teams?.push(item);
             },
             addPlayerToTournament: (state: TournamentState, item: string) => {
                 this.current.playerIds.push(item);

@@ -51,9 +51,6 @@
         "webpack-bundle-analyzer": "^3.8.0",
         "webpack-hot-middleware": "^2.25.0"
     },
-    "gitHooks": {
-        "pre-commit": "lint-staged"
-    },
     "lint-staged": {
         "*.ts": [
             "vue-cli-service lint",

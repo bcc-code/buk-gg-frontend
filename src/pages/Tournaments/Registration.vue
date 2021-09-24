@@ -58,24 +58,24 @@
                                             : 'success'
                                     "
                                     :disabled="
-                                        !eligibleTeams.includes(row.id) ||
-                                        tournament.teams.find(
-                                            (t) => t._id === row.id,
-                                        )
+                                        !eligibleTeams.includes(row) ||
+                                        (tournament.teams ? tournament.teams.find(
+                                                  (t) => t._id === row.id,
+                                              ) : false)
                                             ? true
-                                            : tournament.teams.find(
-                                                  (t) => t.id === row.id,
-                                              )
+                                            : (tournament.teams ? tournament.teams.find(
+                                                  (t) => t._id === row.id,
+                                              ) : false)
                                             ? true
                                             : false
                                     "
                                     @click="fillInfo(row)"
                                     >{{
-                                        !eligibleTeams.includes(row.id)
+                                        !eligibleTeams.includes(row)
                                             ? 'NOT ELIGIBLE'
-                                            : tournament.teams.find(
-                                                  (t) => t.id === row.id,
-                                              )
+                                            : (tournament.teams ? tournament.teams.find(
+                                                  (t) => t._id === row.id,
+                                              ) : false)
                                             ? 'SIGNED UP'
                                             : 'SIGN UP'
                                     }}</base-button
@@ -226,7 +226,7 @@ export default class TournamentRegistration extends Vue {
         return this.$teams.state.teams?.filter((t) => t.gameId === this.tournament.game._id) ?? [];
     }
     public get eligibleTeams() {
-        return this.teams.filter(t => t.players.length >= this.tournament.teamSize.min && t.players.length <= this.tournament.teamSize.max);
+        return this.teams.filter((t) => (t.players.length + 1) >= this.tournament.teamSize.min && (t.players.length + 1)  <= this.tournament.teamSize.max);
     }
     public successAdd: boolean = false;
     public viewModal: boolean = false;
@@ -243,6 +243,7 @@ export default class TournamentRegistration extends Vue {
     public signedUp = false;
 
     public async mounted() {
+        console.log(this.teams);
         this.player = Object.assign({}, this.$session.state.currentUser);
         let i = 0;
         this.tournament.requiredInformation?.forEach((req) => {
