@@ -89,7 +89,7 @@ export default class App extends Vue {
         }
 
         if (localStorage.getItem('lang')) {
-            setI18nLanguageAsync(localStorage.getItem('lang'));
+            setI18nLanguageAsync(localStorage.getItem('lang') ?? 'en');
         } else if (navigator.language === 'no-NB') {
             setI18nLanguageAsync('no');
             localStorage.setItem('lang', 'no');
@@ -104,7 +104,7 @@ export default class App extends Vue {
         }
         await this.$tournaments.loadAll();
         await this.$organizations.loadAll();
-        await this.$teams.loadTeams();
+        await this.$teams.loadAll();
     }
 
     public toggleNavOpen() {

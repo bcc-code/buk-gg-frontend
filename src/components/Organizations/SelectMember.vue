@@ -1,115 +1,112 @@
 <template>
-    <SlideYUpTransition :duration="100">
+    <div
+        class="modal fade"
+        @click.self="closeModal"
+        :class="[
+            { 'show d-block': show },
+            { 'd-none': !show },
+        ]"
+        v-show="show"
+        tabindex="-1"
+        role="dialog"
+        :aria-hidden="!show"
+    >
         <div
-            class="modal fade"
-            @click.self="closeModal"
-            :class="[
-                { 'show d-block': show },
-                { 'd-none': !show },
-            ]"
-            v-show="show"
-            tabindex="-1"
-            role="dialog"
-            :aria-hidden="!show"
+            class="modal-dialog"
         >
             <div
-                class="modal-dialog"
+                class="modal-content"
             >
                 <div
-                    class="modal-content"
+                    class="modal-header"
+                    v-if="$slots.header"
                 >
-                    <div
-                        class="modal-header"
-                        v-if="$slots.header"
-                    >
-                        <slot name="header"></slot>
-                        <slot name="close-button">
-                            <button
-                                type="button"
-                                class="close"
-                                v-if="true"
-                                @click="closeModal"
-                                data-dismiss="modal"
-                                aria-label="Close"
-                            >
-                                <i class="tim-icons icon-simple-remove"></i>
-                            </button>
-                        </slot>
-                    </div>
-
-                    <div
-                        class="modal-body p-0"
-                    >        
-                        <card
-                            type="secondary"
-                            header-classes="bg-white pb-5"
-                            body-classes="px-lg-5 py-lg-5"
-                            class="border-0 mb-0"
+                    <slot name="header"></slot>
+                    <slot name="close-button">
+                        <button
+                            type="button"
+                            class="close"
+                            v-if="true"
+                            @click="closeModal"
+                            data-dismiss="modal"
+                            aria-label="Close"
                         >
-                            <template>
-                                <div class="text-muted text-center mb-3">
-                                    <h3 class="modal-title">
-                                        SELECT MEMBER
-                                    </h3>
-                                </div>
-                                <div>
-                                    <base-input
-                                        :placeholder="$t('common.search')"
-                                        v-model="searchField"
-                                    ></base-input>
-                                </div>
-                            </template>
-                            <div class="card-body">
-                                <base-table
-                                    :data="filteredMembers"
-                                    class="org-list"
-                                    :columns="['name', 'discordUser']"
-                                >
-                                    <template slot="columns">
-                                        <th>Name</th>
-                                        <th>Discord</th>
-                                    </template>
-                                    <template slot-scope="{ row }">
-                                        <td @click="handleMember(row)">
-                                            {{ row.player ? row.player.nickname : undefined}}
-                                        </td>
-                                        <td @click="handleMember(row)">
-                                            {{ row.player ? row.player.discordUser : undefined}}
-                                        </td>
-                                    </template>
-                                </base-table>
-                            </div>
-                            <template slot="footer">
-                                <base-button
-                                    type="secondary"
-                                    @click="closeModal()"
-                                    >Close</base-button
-                                >
-                            </template>
-                        </card>
-                    </div>
+                            <i class="tim-icons icon-simple-remove"></i>
+                        </button>
+                    </slot>
+                </div>
 
-                    <div
-                        class="modal-footer"
-                        v-if="$slots.footer"
+                <div
+                    class="modal-body p-0"
+                >        
+                    <card
+                        type="secondary"
+                        header-classes="bg-white pb-5"
+                        body-classes="px-lg-5 py-lg-5"
+                        class="border-0 mb-0"
                     >
-                        <slot name="footer"></slot>
-                    </div>
+                        <template>
+                            <div class="text-muted text-center mb-3">
+                                <h3 class="modal-title">
+                                    SELECT MEMBER
+                                </h3>
+                            </div>
+                            <div>
+                                <base-input
+                                    :placeholder="$t('common.search')"
+                                    v-model="searchField"
+                                ></base-input>
+                            </div>
+                        </template>
+                        <div class="card-body">
+                            <base-table
+                                :data="filteredMembers"
+                                class="org-list"
+                                :columns="['name', 'discordUser']"
+                            >
+                                <template slot="columns">
+                                    <th>Name</th>
+                                    <th>Discord</th>
+                                </template>
+                                <template slot-scope="{ row }">
+                                    <td @click="handleMember(row)">
+                                        {{ row.player ? row.player.nickname : undefined}}
+                                    </td>
+                                    <td @click="handleMember(row)">
+                                        {{ row.player ? row.player.discordUser : undefined}}
+                                    </td>
+                                </template>
+                            </base-table>
+                        </div>
+                        <template slot="footer">
+                            <base-button
+                                type="secondary"
+                                @click="closeModal()"
+                                >Close</base-button
+                            >
+                        </template>
+                    </card>
+                </div>
+
+                <div
+                    class="modal-footer"
+                    v-if="$slots.footer"
+                >
+                    <slot name="footer"></slot>
                 </div>
             </div>
         </div>
-    </SlideYUpTransition>
+    </div>
 </template>
 <script lang="ts">
 import { Modal, BaseTable } from '../';
 import { Component, Vue } from 'vue-property-decorator';
-import { SlideYUpTransition } from 'vue2-transitions';
+import { Member } from '@/classes';
 
 @Component({
     components: {
         Modal,
         BaseTable,
-        SlideYUpTransition,
     },
     props: {
         members: {
@@ -121,7 +118,7 @@ import { SlideYUpTransition } from 'vue2-transitions';
         },
         handleMember: {
             type: Function,
-            default: (member) => null,
+            default: () => null,
         },
     },
     methods: {
@@ -131,23 +128,6 @@ import { SlideYUpTransition } from 'vue2-transitions';
         },
     },
     computed: {
-        filteredMembers() {
-            return this.members?.filter((member) => {
-                const search = this.searchField
-                    ?.toLowerCase();
-                return (
-                    member.player?.nickname
-                        ?.toLowerCase()
-                        .includes(search) ||
-                    member.player?.discordUser
-                        ?.toLowerCase()
-                        .includes(search) ||
-                    member.player?.name
-                        ?.toLowerCase()
-                        .includes(search)
-                );
-            });
-        },
     },
     watch: {
         show(val) {
@@ -162,10 +142,28 @@ import { SlideYUpTransition } from 'vue2-transitions';
 })
 
 export default class SelectMember extends Vue {
-    public members: Member[];
+    public members?: Member[];
     public searchField: string = '';
-    public show: boolean;
-    public handleMember: (member) => void;
+    public show?: boolean;
+    public handleMember?: (member: Member) => void;
+    
+    public get filteredMembers() {
+        return this.members?.filter((member) => {
+            const search = this.searchField
+                ?.toLowerCase();
+            return (
+                member.player?.displayName
+                    ?.toLowerCase()
+                    .includes(search) ||
+                member.player?.discordTag
+                    ?.toLowerCase()
+                    .includes(search) ||
+                member.player?.name
+                    ?.toLowerCase()
+                    .includes(search)
+            );
+        });
+    }
 }
 
 </script>

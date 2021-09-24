@@ -2,14 +2,14 @@
     <div class="row tournament-list">
         <div class="col-12">
             <h1 class="page-header">
-                {{ $t('common.camps').toUpperCase() }}
+                {{ $t('common.camps').toString().toUpperCase() }}
             </h1>
         </div>
 
         <div
             class="col-xl-4 col-lg-4 col-md-6 mb-lg-6 col-sm-12 col-12 link-tile"
-            v-for="item in camps"
-            :key="item.id"
+            v-for="(item, i) in camps"
+            :key="i"
         >
             <div class="link-tile-title text-center">
                 {{ item.title.toUpperCase() }}
@@ -44,40 +44,36 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class CampList extends Vue {
     public window = window;
 
-    public camps: Array<{
+    public camps: {
         name: string;
         title: any;
         image: string;
-    }>;
-
-    public beforeMount() {
-        this.camps = [
-            {
-                name: 'rj2020',
-                title: this.$t('rc2020.title'),
-                image: '/img/rc2020-header.png',
-            },
-            {
-                name: 'hc2020',
-                title: this.$t('hc2020.title'),
-                image: '/img/hc2020-header.png',
-            },
-            {
-                name: 'pinse2020',
-                title: this.$t('pinse2020.title'),
-                image: '/img/pinse20bg-1080.png',
-            },
-            {
-                name: 'pc2020',
-                title: this.$t('pc2020.title'),
-                image: '/img/vpc20.png',
-            },
-            {
-                name: 'rc2019',
-                title: this.$t('rc2019.title'),
-                image: '/img/rc19.png',
-            },
-        ];
-    }
+    }[] = [
+        {
+            name: 'rj2020',
+            title: this.$t('rc2020.title'),
+            image: '/img/rc2020-header.png',
+        },
+        {
+            name: 'hc2020',
+            title: this.$t('hc2020.title'),
+            image: '/img/hc2020-header.png',
+        },
+        {
+            name: 'pinse2020',
+            title: this.$t('pinse2020.title'),
+            image: '/img/pinse20bg-1080.png',
+        },
+        {
+            name: 'pc2020',
+            title: this.$t('pc2020.title'),
+            image: '/img/vpc20.png',
+        },
+        {
+            name: 'rc2019',
+            title: this.$t('rc2019.title'),
+            image: '/img/rc19.png',
+        },
+    ];
 }
 </script>

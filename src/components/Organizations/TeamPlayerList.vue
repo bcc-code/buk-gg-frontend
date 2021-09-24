@@ -1,5 +1,5 @@
 <template>
-    <base-table :data="team.players">
+    <base-table :data="team?.members">
         <template slot="columns">
             <th v-if="edit">Captain</th>
             <th>Name</th>
@@ -11,40 +11,40 @@
                 <base-button
                     v-if="
                         captain
-                            ? row._id !== captain._id
+                            ? row._id !== captain.playerId
                             : false
                     "
                     icon
                     type="success"
                     ><i
                         class="fas fa-check"
-                        @click="setCaptain(row)"
+                        @click="setCaptain(row.playerId)"
                 /></base-button>
                 <base-button v-else icon type="success" disabled
                     ><i class="fas fa-check"
                 /></base-button>
             </td>
-            <td>{{ row.nickname }}</td>
+            <td>{{ row.player.displayName }}</td>
             <td
                 v-if="!edit"
                 :class="
-                    row.id === captain.id ? 'text-bold' : ''
+                    row.playerId === captain?.playerId ? 'text-bold' : ''
                 "
             >
-                {{ row.discordUser }}
+                {{ row.player.discordTag }}
             </td>
             <td v-if="edit || isCaptain">
                 <base-button
                     v-if="
                         captain
-                            ? row._id !== captain._id
+                            ? row.playerId !== captain.playerId
                             : false || edit
                     "
                     class="btn-red"
                     type="danger"
                     icon
                     ><i
-                        @click="removeTeamMember(row)"
+                        @click="removeTeamMember(row.playerId)"
                         class="fas fa-times"
                 /></base-button>
             </td>
@@ -71,30 +71,26 @@ import { Team } from '../../classes';
             default: false,
         },
     },
-    computed: {
-        players() {
-            return this.team?.players;
-        },
-        captain() {
-            return this.team?.captain;
-        },
-        isCaptain() {
-            return this.$route.name === 'organization' ? this.captain._id === this.$session.state.currentUser?._id : false;
-        },
-    },
 })
 
 export default class TeamPlayerList extends Vue {
-    public players: Player[];
-    public captain: Player[];
-    public team: Team;
+    public team?: Team;
+    public edit?: boolean;
 
-    public removeTeamMember(player: Player) {
-        this.$teams.removePlayer(this.team, player);
+    public get isCaptain() {
+        return this.team?.members.some(i => i.playerId === this.$session.currentUser.id && i.role === 'captain') === true;
     }
 
-    public setCaptain(player: Player) {
-        this.$teams.setCaptain(this.team, player);
+    public get captain() {
+        return this.team?.members.find(i => i.role === 'captain');
+    }
+
+    public removeTeamMember(id: string) {
+        this.team?.removeMember(id);
+    }
+
+    public setCaptain(id: string) {
+        this.team?.setCaptain(id);
     }
 }
 </script>

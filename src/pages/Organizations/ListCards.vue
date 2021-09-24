@@ -4,7 +4,7 @@
             <div class="row tournament-list">
                 <div class="col-12" v-if="type !== 'player'">
                     <h1 class="page-header">
-                        {{ $t('common.organizations').toUpperCase() }}
+                        {{ $t('common.organizations').toString().toUpperCase() }}
                     </h1>
                 </div>
 
@@ -29,20 +29,20 @@
                             style="padding-top: 100%;"
                             text-variant="light"
                             bg-variant="secondary"
-                            :style="`background-image: url(${item.image ? item.image + '?h=250' : ''});${!item.image ? 'background-color: #2c2f33;' :''}`"
+                            :style="`background-image: url(${item.logo ? item.logo + '?h=250' : ''});${!item.logo ? 'background-color: #2c2f33;' :''}`"
                         >
                         </card>
                     </div>
                 </div>
             </div>
             <div class="row" v-if="type !== 'player'">
-                <div class="col-12" v-if="$session.state.currentUser.isO18">
-                    <base-button type="success" :disabled="!$session.state.currentUser.discordIsConnected" @click="modal.createOrg = true">{{
+                <div class="col-12" v-if="$session.currentUser.isO18">
+                    <base-button type="success" :disabled="!$session.currentUser.discordIsConnected" @click="modal.createOrg = true">{{
                         `${$t('organizations.create')}`.toUpperCase()
                     }}</base-button>
-                    <base-button class="ml-3" type="info" @click="openOrganizationIntro()">{{$t('common.information').toUpperCase()}}</base-button>
+                    <base-button class="ml-3" type="info" @click="openOrganizationIntro()">{{$t('common.information').toString().toUpperCase()}}</base-button>
                 </div>
-                <div class="col-12" v-if="!$session.state.currentUser.isO18">
+                <div class="col-12" v-if="!$session.currentUser.isO18">
                     <h5 class="text-white">
                         {{ $t('organizations.contactForCreation') }}
                     </h5>
@@ -69,7 +69,7 @@
             modal-classes="modal-dialog-centered modal-sm"
         >
             <card style="margin-bottom: 0;">
-                <h3>{{ $t('organizations.create').toUpperCase() }}</h3>
+                <h3>{{ $t('organizations.create').toString().toUpperCase() }}</h3>
                 <div class="card-body text-white">
                     {{ $t('organizations.createInformation') }}
                 </div>
@@ -85,7 +85,7 @@
                 <div class="card-body">
                     <base-button
                         type="success"
-                        :disabled="!$session.state.currentUser.phoneNumber"
+                        :disabled="!$session.currentUser.phoneNumber"
                         @click="createOrganization()"
                         >Create</base-button
                     >
@@ -94,7 +94,7 @@
                         @click="modal.createOrg = false"
                         >Close</base-button
                     >
-                    <div class="text-white" v-if="!$session.state.currentUser.phoneNumber">
+                    <div class="text-white" v-if="!$session.currentUser.phoneNumber">
                         Add a phone number to your account to be able to create an organization.
                     </div>
                 </div>
@@ -108,9 +108,10 @@ import Modal from '@/components/Modal.vue';
 import { mapActions, mapState } from 'vuex';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { BaseTable, BaseAlert } from '../../components/';
-import { Organization } from '../../classes';
+import { Member, Organization } from '../../classes';
 import api from '../../services/api';
 import { SemipolarSpinner } from 'epic-spinners';
+import { ApiOrganizationCreateOptions } from 'buk-gg';
 
 @Component({
     components: {
@@ -128,15 +129,10 @@ import { SemipolarSpinner } from 'epic-spinners';
         },
     },
     computed: {
-        organizations() {
-            return this.type !== 'all' ? this.$organizations.state.playerOrganizations : this.$organizations.state.all.filter(
-                (o) => o.isPublic,
-            );
-        },
     },
 })
 export default class OrganizationsList extends Vue {
-    public type: string;
+    public type?: string;
     // public organizations: Organization[] = [];
     public modal = {
         createOrg: false,
@@ -144,15 +140,17 @@ export default class OrganizationsList extends Vue {
     public loading = {
         page: false,
     };
-    public createOrg: Organization = new Organization();
+    public createOrg: ApiOrganizationCreateOptions = {
+        name: '',
+    };
     public nameNotFilled = false;
 
     public async createOrganization() {
         const player = this.$session.state.currentUser;
 
-        if (player.isO18) {
+        if (player?.isO18) {
             if (this.createOrg.name !== '' || this.createOrg.name) {
-                const result = await api.organizations.createOrganization(
+                const result = await api.organizations.create(
                     this.createOrg,
                 );
                 if (result.id) {
@@ -163,6 +161,10 @@ export default class OrganizationsList extends Vue {
                 this.nameNotFilled = true;
             }
         }
+    }
+
+    public get organizations() {
+        return this.type !== 'all' ? this.$organizations.state.all.filter(i => i.members.some((m: Member) => m.playerId === this.$session.currentUser.id)) : this.$organizations.state.all;
     }
 
     public openOrganizationIntro() {

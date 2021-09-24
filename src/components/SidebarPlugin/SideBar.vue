@@ -28,7 +28,7 @@
             <slot> </slot>
             <ul class="nav">
                 <!--By default vue-router adds an active class to each route link. This way the links are colored when clicked-->
-                <slot name="links">
+                <slot name="links" v-if="sidebarLinks">
                     <sidebar-link
                         v-for="(link, index) in sidebarLinks"
                         :key="index"
@@ -73,8 +73,11 @@
 <script lang="ts">
 import SidebarLink from './SidebarLink.vue';
 import { ensureLanguageAsync, setI18nLanguageAsync } from '../../i18n/index';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Route, RouteRecord } from 'vue-router';
 
-export default {
+@Component({
     props: {
         title: {
             type: String,
@@ -107,73 +110,64 @@ export default {
             default: true,
         },
     },
-    provide() {
-        return {
-            autoClose: this.autoClose,
-            addLink: this.addLink,
-            removeLink: this.removeLink,
-        };
-    },
     components: {
         SidebarLink,
     },
-    computed: {
-        /**
-         * Styles to animate the arrow near the current active sidebar link
-         * @returns {{transform: string}}
-         */
-        arrowMovePx() {
-            return this.linkHeight * this.activeLinkIndex;
-        },
-        shortTitle() {
-            return this.title
-                .split(' ')
-                .map((word) => word.charAt(0))
-                .join('')
-                .toUpperCase();
-        },
-    },
-    data() {
-        return {
-            linkHeight: 65,
-            activeLinkIndex: 0,
-            windowWidth: 0,
-            isWindows: false,
-            hasAutoHeight: false,
-            links: [],
-        };
-    },
-    methods: {
-        findActiveLink() {
-            this.links.forEach((link, index) => {
-                if (link.isActive()) {
-                    this.activeLinkIndex = index;
-                }
-            });
-        },
-        addLink(link) {
-            const index = this.$slots.links.indexOf(link.$vnode);
-            this.links.splice(index, 0, link);
-        },
-        removeLink(link) {
-            const index = this.links.indexOf(link);
-            if (index > -1) {
-                this.links.splice(index, 1);
+})
+export default class SideBar extends Vue {
+    public title?: string;
+    public autoClose?: string;
+
+    public sidebarLinks?: any[];
+
+    public linkHeight = 65
+    public activeLinkIndex = 0
+    public windowWidth = 0
+    public isWindows = false
+    public hasAutoHeight = false
+    public links: any[] = []
+    /**
+     * Styles to animate the arrow near the current active sidebar link
+     * @returns {{transform: string}}
+     */
+    public get arrowMovePx() {
+        return this.linkHeight * this.activeLinkIndex;
+    }
+    public get shortTitle() {
+        return this.title?.split(' ')
+            .map((word) => word.charAt(0))
+            .join('')
+            .toUpperCase();
+    }
+    public findActiveLink() {
+        this.links.forEach((link, index) => {
+            if (link.isActive()) {
+                this.activeLinkIndex = index;
             }
-        },
-        pushToDashboard() {
-            if (this.$route.name !== 'dashboard') { this.$router.push('/dashboard'); }
-        },
-        async setLocale(lang) {
-            await setI18nLanguageAsync(lang);
-            await localStorage.setItem('lang', lang);
-            await this.$tournaments.loadAll();
-        },
-    },
+        });
+    }
+    public addLink(link: any) {
+        const index = this.$slots.links?.indexOf(link.$vnode);
+        this.links.splice(index ?? 0, 0, link);
+    }
+    public removeLink(link: any) {
+        const index = this.links.indexOf(link);
+        if (index > -1) {
+            this.links.splice(index, 1);
+        }
+    }
+    public pushToDashboard() {
+        if (this.$route.name !== 'dashboard') { this.$router.push('/dashboard'); }
+    }
+    public async setLocale(lang: string) {
+        await setI18nLanguageAsync(lang);
+        localStorage.setItem('lang', lang);
+        await this.$tournaments.loadAll();
+    }
     mounted() {
         this.$watch('$route', this.findActiveLink, {
             immediate: true,
         });
-    },
+    }
 };
 </script>

@@ -13,7 +13,7 @@
                     <img
                         slot="image"
                         class="card-img-top organization-image"
-                        :src="$organizations.current ? ($organizations.current.image ? $organizations.current.image + '?h=400' : '') : ''"
+                        :src="organization.logo ? organization.logo + '?h=400' : ''"
                     />
                     <div class="row">
                         <div class="col-12">
@@ -39,7 +39,7 @@
                                 <base-button
                                     v-if="editMode"
                                     type="info"
-                                    @click="$refs.imageUpload.click()"
+                                    @click="$refs.imageUpload?.click()"
                                     >{{
                                         fileName !== ''
                                             ? fileName
@@ -64,7 +64,7 @@
                                     @click="saveOrganization()"
                                     >{{
                                         !loading.saveOrganization
-                                            ? $t('common.save').toUpperCase()
+                                            ? $t('common.save').toString().toUpperCase()
                                             : ''
                                     }}</base-button
                                 >
@@ -73,8 +73,8 @@
                                     @click="editOrganization()"
                                     >{{
                                         editMode
-                                            ? $t('common.cancel').toUpperCase()
-                                            : $t('common.edit').toUpperCase()
+                                            ? $t('common.cancel').toString().toUpperCase()
+                                            : $t('common.edit').toString().toUpperCase()
                                     }}</base-button
                                 >
                                 <base-alert
@@ -91,7 +91,7 @@
                                 >
                             </div>
 
-                            <base-alert v-if="modal.UpdatedImage" type="success"
+                            <base-alert v-if="modal.updatedImage" type="success"
                                 >Image updated.</base-alert
                             >
                             <base-alert
@@ -118,8 +118,8 @@
                             type="info"
                             @click="modal.selectCaptain = true"
                             >{{
-                                newTeam.captain
-                                    ? newTeam.captain.nickname
+                                newTeam.captainId
+                                    ? members.find(i => i.playerId === newTeam.captainId)?.player?.name
                                     : 'SELECT CAPTAIN'
                             }}
                         </base-button>
@@ -128,12 +128,12 @@
                             :title="
                                 selectedGame
                                     ? selectedGame
-                                    : this.$t('common.game').toUpperCase()
+                                    : this.$t('common.game').toString().toUpperCase()
                             "
                         >
                             <a
                                 v-for="game in games"
-                                :key="game._id"
+                                :key="game.id"
                                 class="dropdown-item"
                                 @click="selectGameForTeam(game)"
                                 style="cursor: pointer;"
@@ -141,7 +141,7 @@
                             >
                         </base-dropdown>
                         <base-button type="primary" :loading="loading.createTeam" @click="createTeam()">{{
-                            $t('common.create').toUpperCase()
+                            $t('common.create').toString().toUpperCase()
                         }}</base-button>
 
                         <base-alert
@@ -252,8 +252,10 @@ import { TranslateResult } from 'vue-i18n';
 import discord from '../services/discord';
 import { uniqueId } from 'lodash';
 import { SemipolarSpinner } from 'epic-spinners';
-import { Organization, Team } from '../classes';
+import { Member, Organization, Team } from '../classes';
 import { TeamCard } from './Organizations/';
+import { ApiGame, ApiPlayer, ApiTeamCreateOptions } from 'buk-gg';
+import api from '@/services/api';
 
 @Component({
     components: {
@@ -272,25 +274,30 @@ export default class OrganizationDetails extends Vue {
     public fileName: string = '';
     public uploadedFile: any;
     public currentUserIsOwner: boolean = false;
-    public currentUser: any = {};
     public editMode: boolean = false;
     public updateKey: number = 0;
     public addCaptainField: string = '';
     public newName: string = '';
+
+    public get currentUser() {
+        return this.$organizations.current?.members.find((m: Member) => m.playerId === this.$session.currentUser.id);
+    }
 
     public get members() {
         return this.$organizations.current?.members ?? [];
     }
 
     public get pending() {
-        return this.$organizations.current?.pending ?? [];
+        return this.$organizations.current?.invitations ?? [];
     }
 
     public get pageLoading() {
         return this.loading.page ? 'opacity: 0; transition: opacity 0.2s' : 'opacity: 1; transition: opacity 0.2s';
     }
 
-    public alert = {
+    public alert: {
+        [key: string]: boolean;
+    } = {
         failedAdd: false,
         successAdd: false,
         failedSave: false,
@@ -303,10 +310,14 @@ export default class OrganizationDetails extends Vue {
         createdTeam: false,
     };
     public successSave: boolean = false;
-    public selectedImage: any = null;
+    public selectedImage?: string;
     public searchField: string = '';
-    public games: Game[] = [];
-    public newTeam: Team = new Team();
+    public newTeam: ApiTeamCreateOptions = {
+        name: '',
+        organizationId: this.$organizations.currentId ?? '',
+        captainId: '',
+        gameId: ''
+    };
     public loading = {
         saveOrganization: false,
         uploadImage: false,
@@ -322,6 +333,17 @@ export default class OrganizationDetails extends Vue {
         members: [],
     };
 
+    public get organization() {
+        if (!this.$organizations.current)
+            throw new Error("Org not found");
+        
+        return this.$organizations.current;
+    }
+
+    public get games() {
+        return this.$session.state.games;
+    }
+
     public tempAlert(value: string, timer: number) {
         this.alert[value] = true;
         setTimeout(() => {
@@ -332,18 +354,10 @@ export default class OrganizationDetails extends Vue {
     public async mounted() {
         this.loading.page = true;
         if (this.$route.params.id) {
-            await this.$organizations.loadOrganization(this.$route.params.id);
-            await this.$teams.getTeams(this.$route.params.id);
-            this.newName = this.$organizations.current?.name;
-            this.teams = this.$teams.state.currentTeams;
+            await this.$organizations.load(this.$route.params.id);
+            this.teams = await this.$teams.getInOrganization(this.$route.params.id);
         } else {
             this.$router.push('/organizations');
-        }
-
-        if (this.$organizations.current?.members) {
-            this.currentUser = this.$organizations.current?.members.find(
-                (m) => m.player?._id === this.$session.state.currentUser._id,
-            ) || null;
         }
 
         if (
@@ -360,37 +374,34 @@ export default class OrganizationDetails extends Vue {
     public editOrganization() {
         // this.$router.push(`${this.$route.path}/edit`);
         this.editMode = !this.editMode;
-        this.$teams.getGames().then((games) => {
-            this.games = games;
-        });
     }
 
-    public selectGameForTeam(game: Game) {
+    public selectGameForTeam(game: ApiGame) {
         this.selectedGame = game.name;
-        this.newTeam.setGame(game);
+        this.newTeam.gameId = game.id;
     }
 
     public selectCaptain(member: Member) {
-        this.newTeam.setCaptain(member.player);
+        this.newTeam.captainId = member.playerId;
         this.modal.selectCaptain = false;
     }
 
     public async createTeam() {
         this.loading.createTeam = true;
-        this.newTeam.setOrganization(this.$organizations.current);
-        this.newTeam.name = `${this.$organizations.current.name}`;
-        await this.$teams.createTeam(this.newTeam);
+        this.newTeam.organizationId = this.$organizations.current?.id ?? '';
+        this.newTeam.name = `${this.$organizations.current?.name}`;
+        await api.teams.create(this.newTeam);
         this.loading.createTeam = false;
     }
 
     public async search() {
         this.searchResult.discord = [];
-        if (this.searchField !== '') {
-            const result = await this.$organizations.searchForPlayers(
-                this.searchField,
-            );
-            this.searchResult.members = result;
-        }
+        // if (this.searchField !== '') {
+        //     const result = await this.$organizations.searchForPlayers(
+        //         this.searchField,
+        //     );
+        //     this.searchResult.members = result;
+        // }
     }
 
     public async searchThroughDiscord() {
@@ -401,10 +412,14 @@ export default class OrganizationDetails extends Vue {
         }
     }
 
-    public async addMember(player?: any, discordId?: any) {
+    public async addMember(player: ApiPlayer, discordId?: any) {
         this.searchField = '';
-        this.loading.addMember = player?._id || discordId;
-        await this.$organizations.addMember({id: player?._id ?? discordId});
+        this.loading.addMember = player?.id || discordId;
+        this.organization.members.push(new Member({
+            playerId: player.id,
+            role: 'member',
+        }));
+        await this.organization.save();
         this.searchResult = {
             discord: [],
             members: [],
@@ -415,15 +430,14 @@ export default class OrganizationDetails extends Vue {
 
     public async saveOrganization() {
         this.loading.saveOrganization = true;
-        this.$organizations.setData({ name: this.newName });
-        const result = await this.$organizations.current.save();
-        if (result?.id) {
+        try {
+            await this.$organizations.current?.save();
             this.alert.successSave = true;
             this.loading.saveOrganization = false;
             setTimeout(() => {
                 this.alert.successSave = false;
             }, 4000);
-        } else {
+        } catch {
             this.loading.saveOrganization = false;
             this.alert.failedSave = true;
             setTimeout(() => {
@@ -434,7 +448,7 @@ export default class OrganizationDetails extends Vue {
 
     public async submitImage() {
         this.loading.uploadImage = true;
-        const result = await this.$organizations.uploadImage(
+        const result = await this.$organizations.current?.save(
             this.selectedImage,
         );
         if (result) {
@@ -451,15 +465,15 @@ export default class OrganizationDetails extends Vue {
         }
     }
 
-    public async handleImage(e) {
-        this.createBase64Image(e.target.files[0]);
+    public async handleImage(e: any) {
+        this.createBase64Image(e.target?.files[0]);
         this.fileName = e.target.files[0]?.name;
     }
-    public async createBase64Image(file) {
+    public async createBase64Image(file: Blob) {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            this.selectedImage = e.target.result;
+            this.selectedImage = e.target?.result as string;
         };
         reader.readAsDataURL(file);
     }

@@ -23,7 +23,7 @@
                             class="page-details-body"
                             v-if="$session.state.isAuthenticated"
                             v-html="
-                                $t(`${$route.params.camp}.body`).replace(
+                                $t(`${$route.params.camp}.body`).toString().replace(
                                     /<p><\/p>/g,
                                     '<br/>',
                                 )
@@ -66,7 +66,8 @@
 import { Vue } from 'vue-property-decorator';
 
 export default class CampDetails extends Vue {
-    public pushTo(param) {
+
+    public pushTo(param: string) {
         if (this.$route.params.camp === param) {
             return;
         } else {

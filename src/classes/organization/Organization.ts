@@ -8,7 +8,7 @@ export default class Organization implements ApiOrganization {
     public id;
     public name;
     public invitations;
-    public members;
+    public members: Member[];
     public logo;
 
     constructor(i: ApiOrganization) {
@@ -30,8 +30,12 @@ export default class Organization implements ApiOrganization {
         }
     }
 
-    public async save() {
+    public async save(image?: string) {
         const options = new OrganizationUpdateOptions(this._original, this.getModel());
+
+        if (image) {
+            options.setImage(image);
+        }
 
         if (options.updated) {
             await api.organizations.update(this.id, options.getModel());

@@ -7,7 +7,7 @@ import TeamUpdateOptions from './TeamUpdateOptions';
 export default class Team implements ApiTeam {
     private _original;
     public id;
-    public members;
+    public members: Member[];
     public name;
     public organizationId;
     public gameId;
@@ -29,6 +29,21 @@ export default class Team implements ApiTeam {
             organizationId: this.organizationId,
             gameId: this.gameId,
         }
+    }
+
+    public removeMember(id: string) {
+        this.members = this.members.filter(i => i.playerId !== id);
+    }
+
+    public setCaptain(id: string) {
+        this.members = this.members.map(i => {
+            if (i.playerId === id) {
+                i.role = 'captain';
+            } else {
+                i.role = 'member';
+            }
+            return i;
+        })
     }
 
     public async save() {
