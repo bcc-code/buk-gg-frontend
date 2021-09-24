@@ -111,9 +111,9 @@ export default class TeamCard extends Vue {
         saving: false,
         deleting: false,
     };
-    public team: Team;
-    public edit: boolean;
-    public list: boolean;
+    public team?: Team;
+    public edit?: boolean;
+    public list?: boolean;
 
     public deleted: boolean = false;
 

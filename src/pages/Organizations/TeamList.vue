@@ -98,9 +98,9 @@ export default class TeamList extends Vue {
     public async onSelectGame(game: ApiGame) {
         this.loading = true;
         this.selectedGame = game.id;
-        this.teams = ((await this.$teams.getTeamsInGame(
-            game,
-        )) as Team[]).filter((t) => t.isPublic);
+        this.teams = ((await this.$teams.getInGame(
+            game.id,
+        )) as Team[]);
         this.loading = false;
     }
 }
