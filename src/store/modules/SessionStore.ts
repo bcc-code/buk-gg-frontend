@@ -4,11 +4,13 @@ import router from '@/router';
 import { RootStore } from '@/store';
 import BaseStore from '@/store/modules/base/BaseStore';
 import User from '@/classes/User';
+import { ApiGame } from 'buk-gg';
 
 export interface SessionState {
     currentUser?: User;
     isAuthenticated: boolean;
     isImpersonating: boolean;
+    games: ApiGame[];
 }
 
 export class SessionStore extends BaseStore<SessionState> {
@@ -17,6 +19,7 @@ export class SessionStore extends BaseStore<SessionState> {
             currentUser: undefined,
             isAuthenticated: false,
             isImpersonating: false,
+            games: [],
         });
 
         // MUTATIONS //
@@ -38,6 +41,9 @@ export class SessionStore extends BaseStore<SessionState> {
             setIsImpersonating: (state, value: boolean) => {
                 state.isImpersonating = value;
             },
+            setGames: (state, games: ApiGame[]) => {
+                state.games = games;
+            },
         };
 
         // ACTIONS //
@@ -46,6 +52,7 @@ export class SessionStore extends BaseStore<SessionState> {
             loadCurrentSession: async (store): Promise<User> => {
                 const session = new User(await api.session.getCurrentSession());
                 this.setCurrentSession(session);
+                store.commit('setGames', await api.items.getGames());
                 return session;
             },
             startSession: async (store) => {

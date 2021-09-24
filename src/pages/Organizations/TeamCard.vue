@@ -1,13 +1,13 @@
 <template>
-    <card type="user">
+    <card type="user" v-if="team">
         <p class="card-text"></p>
         <div class="author team-card">
             <div class="block block-one"></div>
             <div class="block block-two"></div>
             <div class="block block-three"></div>
             <div class="block block-four"></div>
-            <img class="avatar" :src="$route.name == 'teams' ? team.organizationIcon + '?h=150' : team.icon + '?h=150'" alt="..." />
-            <base-button :loading="loading.deleting" v-if="edit && team.Id && !deleted" type="danger" class="float-right" @click="deleteTeam()" style="position: absolute; right: 0; top: 0;" icon><i class="fas fa-times"></i></base-button>
+            <img class="avatar" :src="$route.name == 'teams' ? team.Organization?.logo + '?h=150' : team.Game?.icon + '?h=150'" alt="..." />
+            <!-- <base-button :loading="loading.deleting" v-if="edit && team.id && !deleted" type="danger" class="float-right" style="position: absolute; right: 0; top: 0;" icon><i class="fas fa-times"></i></base-button> -->
             <base-input
                 v-if="edit"
                 v-model="team.name"
@@ -24,10 +24,10 @@
                             class="float-left"
                             type="primary"
                             :loading="loading.saving"
-                            @click="saveTeam()"
+                            @click="team?.save()"
                             >{{
                                 !loading.saving
-                                    ? $t('common.save').toUpperCase()
+                                    ? $t('common.save').toString().toUpperCase()
                                     : ''
                             }}</base-button
                         >
@@ -39,7 +39,7 @@
                             ><i class="fas fa-plus"
                         /></base-button>
                     </div>
-                    <div class="col-12">
+                    <!-- <div class="col-12">
                         <base-alert dismissible v-if="failedSave" type="danger"
                             >Failed to save Team</base-alert
                         >
@@ -49,15 +49,15 @@
                             type="success"
                             >Saved Team</base-alert
                         >
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
         <div class="text-center" v-if="list">
             <h4 type="primary" class="text-muted">
                 {{
-                    team.organizationName != team.name
-                        ? team.organizationName
+                    team.Organization?.name != team.name
+                        ? team.Organization?.name
                         : ''
                 }}
             </h4>
@@ -69,7 +69,8 @@
 import { Vue, Prop, Component } from 'vue-property-decorator';
 import { BaseTable, Modal, BaseAlert } from '../../components';
 import { SelectMember, TeamPlayerList } from '../../components/Organizations';
-import { Team } from '../../classes';
+import { Member, Team } from '../../classes';
+import { ApiPlayer } from 'buk-gg';
 
 @Component({
     name: 'team-card',
@@ -100,11 +101,6 @@ import { Team } from '../../classes';
         SelectMember,
         TeamPlayerList,
     },
-    computed: {
-        members() {
-            return this.currentUserIsCaptain || this.edit ? this.$organizations.current?.members || [] : [];
-        },
-    },
 })
 export default class TeamCard extends Vue {
     public loading = {
@@ -117,63 +113,26 @@ export default class TeamCard extends Vue {
 
     public deleted: boolean = false;
 
-    public currentUserIsCaptain: boolean = false;
     public addMemberField: string = '';
     public failedAdd: boolean = false;
     public showAddMemberModal: boolean = false;
-    public failedSave = false;
-    public successSave = false;
 
-    public players: Player[] = [];
+    public players: ApiPlayer[] = [];
 
     public mounted() {
-        if (this.$organizations.current?.id === this.team.organizationId) {
-            if (
-                this.team.captain?._id === this.$session.state.currentUser._id
-            ) {
-                this.currentUserIsCaptain = true;
+        if (this.team) {
+            if (this.$organizations.current?.id === this.team.organizationId) {
             }
         }
-        if (this.team.captain) {
-            this.players.push(this.team.captain);
-        }
-        this.team.players.forEach((player) => {
-            this.players.push(player);
-        });
     }
 
-    public addPlayer(player: Player) {
-        this.$teams.addPlayer(this.team, player);
-        // this.players.push(player);
-        this.showAddMemberModal = false;
-        this.addMemberField = '';
+    public get currentUserIsCaptain() {
+        return this.team?.members.some((i: Member) => i.playerId === this.$session.currentUser.id);
     }
 
-    public async saveTeam() {
-        this.loading.saving = true;
-        const result = await this.team.save();
-        this.loading.saving = false;
-        if (result?.id) {
-            this.successSave = true;
-            setTimeout(() => {
-                this.successSave = false;
-            }, 4000);
-        } else {
-            this.failedSave = true;
-            setTimeout(() => {
-                this.failedSave = false;
-            }, 4000);
-        }
-    }
-
-    public async deleteTeam() {
-        this.loading.deleting = true;
-        const result = await this.team.delete();
-        this.loading.deleting = false;
-        if (result) {
-            this.deleted = true;
-        }
-    }
+    public get members() {
+        return this.currentUserIsCaptain || this.edit ? this.$organizations.current?.members ?? [] : [];
+    };
 }
 </script>
 <style></style>

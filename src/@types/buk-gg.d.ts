@@ -40,6 +40,7 @@ declare module 'buk-gg' {
 
     interface ApiTeam extends ApiObject {
         organizationId: string;
+        gameId: string;
     }
 
     interface ApiTeamCreateOptions {
