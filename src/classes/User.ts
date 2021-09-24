@@ -1,6 +1,12 @@
 import api from "@/services/api";
 import { ApiUser } from "buk-gg";
 
+export type DiscordUser = {
+    id: string;
+    username: string;
+    discriminator: string;
+}
+
 export default class User implements ApiUser {
     public id;
     public dateLastActive;
@@ -53,5 +59,11 @@ export default class User implements ApiUser {
             phoneNumber: this.phoneNumber,
         });
         this.loading = false;
+    }
+
+    public setDiscord(user: DiscordUser) {
+        this.discordUser =
+            user.username + '#' + user.discriminator;
+        this.discordId = user.id;
     }
 }

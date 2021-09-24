@@ -52,7 +52,7 @@ export class TournamentStore extends CrudStore<
     }
 
     public load(id: string) {
-        return this.dispatch('load', id);
+        return this.dispatch('load', id) as Promise<void>;
     }
 
     protected getItemId(item?: object | Tournament | undefined) {

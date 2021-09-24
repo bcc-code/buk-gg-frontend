@@ -91,10 +91,10 @@ declare module 'buk-gg' {
     }
 
     interface ApiUserUpdateOptions {
-        nickname: string;
-        phoneNumber: string;
-        discordId: string;
-        discordUser: string;
+        nickname?: string;
+        phoneNumber?: string;
+        discordId?: string;
+        discordUser?: string;
     }
 
     interface ApiParticipant {

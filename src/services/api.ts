@@ -2,7 +2,7 @@ import http from '@/services/http';
 import Vue, { PluginObject } from 'vue';
 
 import { LocaleMessageObject } from 'vue-i18n';
-import { ApiUser, ApiUserUpdateOptions, ApiOrganization, ApiOrganizationCreateOptions, ApiOrganizationUpdateOptions, ApiTeam, ApiTeamCreateOptions, ApiTeamUpdateOptions, ApiMemberUpdateOptions, ApiTournament, ApiParticipant } from 'buk-gg';
+import { ApiUser, ApiUserUpdateOptions, ApiOrganization, ApiOrganizationCreateOptions, ApiOrganizationUpdateOptions, ApiTeam, ApiTeamCreateOptions, ApiTeamUpdateOptions, ApiMemberUpdateOptions, ApiTournament, ApiParticipant, ApiGame } from 'buk-gg';
 
 export class Api implements PluginObject<any> {
     public localization = {
@@ -16,7 +16,7 @@ export class Api implements PluginObject<any> {
             return http.get<ApiUser>('Session');
         },
         updateCurrentUser(options: ApiUserUpdateOptions) {
-            return http.put<ApiUserUpdateOptions>('Session', options);
+            return http.put<void>('Session', options);
         },
     };
 
@@ -82,6 +82,12 @@ export class Api implements PluginObject<any> {
             return http.get<boolean>(`discord/connected/${id}`);
         },
     };
+
+    public items = {
+        getGames() {
+            return http.get<ApiGame[]>('Items/Games');
+        },
+    }
 
     // Installer
     public install(vue: typeof Vue, options?: any) {

@@ -68,10 +68,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import BaseAlert from '@/components/BaseAlert.vue';
-import Modal from '@/components/Modal.vue';
 import Discord from '../../services/discord';
-import api from '../../services/api';
-import User from '@/classes/User';
 
 @Component({
     components: {
@@ -95,11 +92,14 @@ export default class DiscordAccount extends Vue {
     async mounted() {
         if (await Discord.completeDiscordLogin()) {
             const discordUser = Discord.discordUser;
-            if (discordUser) {
+            if (discordUser && this.player) {
                 // this.notifyVue('top', 'center');
 
-                const invite = 'https://discord.gg/8cf8XjB';
-                await this.$session.loginDiscord({discordUser, invite});
+                this.player.setDiscord(discordUser);
+
+                await this.player.save();
+
+                window.location.replace('https://discord.gg/8cf8XjB');
                 // this.$bvModal.show("discord.modal0");
             }
         }
@@ -107,7 +107,9 @@ export default class DiscordAccount extends Vue {
     async disconnectDiscordLogin() {
         Discord.disconnectDiscordLogin();
         if (this.player) {
-            this.player.discordId = undefined
+            this.player.discordId = undefined;
+            this.player.discordUser = undefined;
+            await this.player.save();
         }
     }
     initDiscordLogin() {

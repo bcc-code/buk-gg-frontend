@@ -132,9 +132,6 @@ import TournamentCard from './Tournaments/Card.vue';
         introduction() {
             return this.$t('home.introduction').toString();
         },
-        currentUrl() {
-            return document.location.hostname;
-        },
     },
 })
 export default class Dashboard extends Vue {
@@ -146,7 +143,6 @@ export default class Dashboard extends Vue {
         let liveStreams = 0;
         for (const i of this.$tournaments.state.all) {
             // Add back in if necessary
-            this.$tournaments.loadTournament(i.id);
             if (i.liveStream) {
                 if (!this.liveStreams.includes(i.liveStream)) { this.liveStreams.push(i.liveStream); }
                 liveStreams = liveStreams + 1;
@@ -158,6 +154,10 @@ export default class Dashboard extends Vue {
 
         const player = Object.assign({}, this.$session.state.currentUser);
     }
+
+    public get currentUrl() {
+        return document.location.hostname;
+    };
 }
 </script>
 <style lang="scss">

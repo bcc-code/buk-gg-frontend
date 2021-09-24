@@ -4,15 +4,15 @@
             <div class="row">
                 <div
                     v-for="game in games"
-                    :key="game._id"
+                    :key="game.id"
                     class="col-xl-2 col-lg-3 col-md-4 mb-lg-5 col-sm-6 col-6 link-tile"
-                    :class="selectedGame._id != game._id ? '' : 'selected'"
+                    :class="selectedGame != game.id ? '' : 'selected'"
                     
                 >
-                    <div @click="selectedGame._id != game._id ? onSelectGame(game) : ''"
+                    <div @click="selectedGame != game.id ? onSelectGame(game) : ''"
                     
                     :style="
-                        selectedGame._id != game._id
+                        selectedGame != game.id
                             ? `cursor: pointer;`
                             : 'cursor: unset;'
                     ">
@@ -50,7 +50,7 @@
             <div class="row">
                 <div
                     v-for="team in teams"
-                    :key="team._id"
+                    :key="team.id"
                     class="col-12 col-sm-6 col-lg-3 col-md-4"
                     @click="
                         $router.push(`/organization/${team.organizationId}`)
@@ -66,9 +66,9 @@
         </div>
         <div
             class="col-12"
-            v-if="selectedGame._id && teams.length < 1 && !loading"
+            v-if="selectedGame && teams.length < 1 && !loading"
         >
-            <h3 class="text-muted">{{ `No teams in ${selectedGame.name}` }}</h3>
+            <h3 class="text-muted">{{ `No teams in ${games.find(i => i.id === selectedGame)?.name}` }}</h3>
         </div>
         <div v-else></div>
     </div>
@@ -77,6 +77,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import TeamCard from './TeamCard.vue';
 import { Team } from '../../classes';
+import { ApiGame } from 'buk-gg';
+import api from '@/services/api';
 
 @Component({
     components: {
@@ -84,20 +86,18 @@ import { Team } from '../../classes';
     },
 })
 export default class TeamList extends Vue {
-    public games: Game[] = [];
+    public games: ApiGame[] = [];
     public teams: Team[] = [];
-    public loading: boolean = false;
-    public selectedGame: Game = {} as Game;
+    public loading = false;
+    public selectedGame = '';
 
-    public mounted() {
-        this.$teams.getGames().then((games: Game[]) => {
-            this.games = games.filter((g) => g.hasTeams);
-        });
+    public async mounted() {
+        this.games = await api.items.getGames();
     }
 
-    public async onSelectGame(game: Game) {
+    public async onSelectGame(game: ApiGame) {
         this.loading = true;
-        this.selectedGame = game;
+        this.selectedGame = game.id;
         this.teams = ((await this.$teams.getTeamsInGame(
             game,
         )) as Team[]).filter((t) => t.isPublic);
