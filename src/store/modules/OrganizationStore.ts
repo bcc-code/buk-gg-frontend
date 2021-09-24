@@ -43,6 +43,10 @@ export class OrganizationStore extends CrudStore<
         };
     }
 
+    public load(id: string) {
+        return this.dispatch("load", id) as Promise<Organization>;
+    }
+
     protected getItemId(item?: object | Organization | undefined) {
         if (item) {
             return (item as Organization).id;
