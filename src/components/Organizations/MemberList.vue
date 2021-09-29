@@ -148,10 +148,10 @@ import { BaseTable, LoadingButton } from '../../components';
             return ['owner', 'officer'].includes(this.$organizations.current?.members?.find((m) => m.player?._id === this.$session.state.currentUser._id)?.role);
         },
         isMember() {
-            return this.members.find((m) => m.player._id === this.$session.state.currentUser._id) ? true : false;
+            return this.members.find((m) => m.player?._id === this.$session.state.currentUser._id) ? true : false;
         },
         isPending() {
-            return this.pending.find((m) => m.player._id === this.$session.state.currentUser._id) ? true : false;
+            return this.pending.find((m) => m.player?._id === this.$session.state.currentUser._id) ? true : false;
         },
     },
 })
