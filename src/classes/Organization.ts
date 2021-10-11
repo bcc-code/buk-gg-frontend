@@ -72,7 +72,7 @@ export class Organization {
     }
 
     public addPendingMember(player: Player, type: string) {
-        if (this.Pending.find((p) => p.player._id === player._id)) {
+        if (!player || this.Pending.find((p) => p.player?._id === player._id)) {
             return;
         } else {
             this.Pending.push({

@@ -86,7 +86,7 @@
                         <td v-if="!edit">{{ row.player.discordUser }}</td>
                         <td>
                             <base-button
-                                v-if="$session.state.currentUser._id !== row.player._id"
+                                v-if="row.player && $session.state.currentUser._id !== row.player._id"
                                 class="btn-red mr-2"
                                 type="info"
                                 icon
@@ -97,7 +97,7 @@
                                     class="fas fa-check"
                             /></base-button>
                             <base-button
-                                v-if="$session.state.currentUser._id !== row.player._id"
+                                v-if="row.player && $session.state.currentUser._id !== row.player._id"
                                 class="btn-red"
                                 type="danger"
                                 icon
