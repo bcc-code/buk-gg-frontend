@@ -3,7 +3,7 @@
         <div class="col-lg-8 blog-page">
             <div
                 v-if="
-                    ['pc2020', 'rc2019', 'pinse2020', 'hc2020', 'rc2020', 'hc2021'].includes(
+                    ['pc2020', 'rc2019', 'pinse2020', 'hc2020', 'rc2020', 'hc2021', 'rc2021'].includes(
                         $route.params.camp,
                     )
                 "

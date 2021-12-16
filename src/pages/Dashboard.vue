@@ -16,15 +16,15 @@
                 </card>
             </div>
 
-            <div class="col-lg-4 link-tile" @click="$router.push('/camps/hc2021')">
-                <div class="link-tile-title text-center">{{ $t('hc2021.title') }}</div>
+            <div class="col-lg-4 link-tile" @click="$router.push('/camps/rc2021')">
+                <div class="link-tile-title text-center">{{ $t('rc2021.title') }}</div>
                 <card style="cursor: pointer;">
                     <template slot="header">
                     </template>
                     <img
                         slot="image-bottom"
                         class="card-img-bottom"
-                        src="/img/hc2021-header.jpg"
+                        src="/img/rc2021-header.jpg"
                         style="max-height: 290px; object-fit: cover;"
                     />
                 </card>
