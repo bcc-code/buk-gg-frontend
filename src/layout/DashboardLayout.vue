@@ -18,8 +18,8 @@
                     icon="fas fa-trophy"
                 />
                 <sidebar-link
-                    :to="'/camps/rc2021'"
-                    name="RC2021"
+                    :to="'/camps/pc2022'"
+                    name="PC2022"
                     icon="fas fa-tv"
                 />
                 <sidebar-link
