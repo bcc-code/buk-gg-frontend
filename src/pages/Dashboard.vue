@@ -17,7 +17,7 @@
             </div>
 
             <div class="col-lg-4 link-tile" @click="$router.push('/camps/pc2022')">
-                <div class="link-tile-title text-center">{{ $t('pc2021.title') }}</div>
+                <div class="link-tile-title text-center">{{ $t('pc2022.title') }}</div>
                 <card style="cursor: pointer;">
                     <template slot="header">
                     </template>
