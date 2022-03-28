@@ -16,15 +16,15 @@
                 </card>
             </div>
 
-            <div class="col-lg-4 link-tile" @click="$router.push('/camps/rc2021')">
-                <div class="link-tile-title text-center">{{ $t('rc2021.title') }}</div>
+            <div class="col-lg-4 link-tile" @click="$router.push('/camps/pc2022')">
+                <div class="link-tile-title text-center">{{ $t('pc2021.title') }}</div>
                 <card style="cursor: pointer;">
                     <template slot="header">
                     </template>
                     <img
                         slot="image-bottom"
                         class="card-img-bottom"
-                        src="/img/rc2021-header.jpg"
+                        src="/img/pc2022-logo.jpg"
                         style="max-height: 290px; object-fit: cover;"
                     />
                 </card>
@@ -87,20 +87,6 @@
                     </div>
                 </b-carousel>
             </div>
-            <!-- <div class="col-lg-4">
-        <card>
-           <div class="card-img">
-          <iframe
-              src="https://player.twitch.tv/?channel=throughust&parent=buk.gg&muted=true"
-              height="300px"
-              width="100%"
-              frameborder="0"
-              scrolling="no"
-              allowfullscreen="true">
-          </iframe>
-          </div> 
-        </card>
-      </div> -->
         </div>
         <div class="row">
             <div class="col-xl-4 col-lg-4 col-md-4">
