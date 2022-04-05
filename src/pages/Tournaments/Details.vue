@@ -12,9 +12,9 @@
                         tournament.registrationOpen || tournament.telegramLink
                     "
                 >
-                    <p v-if="!tournament.registrationOpen">
+                    <!-- <p v-if="!tournament.registrationOpen">
                         {{ $t('registration.closed') }}
-                    </p>
+                    </p> -->
                     <registration-modal
                         class="float-left center-mobile"
                         v-if="tournament.registrationOpen"
