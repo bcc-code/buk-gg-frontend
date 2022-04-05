@@ -14,7 +14,7 @@
                         alt="Main Image"
                         class="card-img-top"
                         style="height: 500px; object-fit: contain"
-                        :src="`/img/${$route.params.camp}-logo.png`"
+                        :src="`/img/${$route.params.camp}-logo.jpg`"
                     />
                 </card>
                 <card>
